@@ -35,7 +35,7 @@ maincoin_tradcoin_type_mine
   - `tradcoin`：交易币（如 `BTC`, `ETH`...）
   - `type`：模块类型（目前代码中定义在 `Coina`）
     - `trad` — 币币（spot）
-  - `mine`：客户端需要的周期或时间粒度（如 `1m`, `5m`, `15m`, `30m`, `60m`, `240m`, `1D` 等）
+  - `mine`：客户端需要的周期或时间粒度（如 `1`, `5`, `15`, `30`, `60`, `240`, `1440` 等）
 
 - 例子：
   - `USDT_BTC_trad_1m`
