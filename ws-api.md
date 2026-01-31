@@ -10,7 +10,7 @@
 
 示例连接：
 ```
-ws://api.ibmxi.com/ws/{member}
+ws://m.ibmxi.com/ws/{member}
 // 例如：ws://localhost:8080/ws/2111333232
 ```
 
@@ -31,7 +31,7 @@ maincoin_tradcoin_type_mine
 ```
 
 - 各段含义：
-  - `maincoin`：主币（如 `USDT`, `CNY`...）
+  - `maincoin`：主币（如 `USDT`, `CNY`...）m
   - `tradcoin`：交易币（如 `BTC`, `ETH`...）
   - `type`：模块类型（目前代码中定义在 `Coina`）
     - `trad` — 币币（spot）
