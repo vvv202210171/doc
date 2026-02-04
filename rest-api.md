@@ -337,7 +337,7 @@ curl -X POST https://m.ibmxi.com/api/robot/user/reg \
 
 ## 5. 获取用户信息 `/robot/user/info`
 
-根据钱包地址获取用户的详细信息。
+根据钱包地址获取用户的详细信息，包括基本信息、账户状态、推荐关系和权限等。
 
 ### 5.1 请求信息
 
@@ -354,14 +354,26 @@ GET /robot/user/info
 
 | 参数名 | 类型 | 必填 | 说明 | 示例 |
 |--------|------|------|------|------|
-| address | String | 是 | 用户钱包地址 | 0x1234567890abcdef... |
+| address | String | 是 | 用户钱包地址（机器人用户标识） | 0x001 |
 
 **请求示例**
-```
-GET /robot/user/info?address=0x1234567890abcdef1234567890abcdef12345678
 
-请求 Header：
-authorization: your-auth-key
+使用 curl：
+```bash
+curl -X GET "https://m.ibmxi.com/api/robot/user/info?address=0x001" \
+  -H "authorization: your-auth-key"
+```
+
+使用 JavaScript：
+```javascript
+const response = await fetch('/robot/user/info?address=0x001', {
+  method: 'GET',
+  headers: {
+    'authorization': 'your-auth-key'
+  }
+});
+const result = await response.json();
+console.log(result);
 ```
 
 ### 5.2 返回数据
@@ -370,64 +382,164 @@ authorization: your-auth-key
 ```json
 {
   "code": 200,
-  "msg": "操作成功",
+  "msg": "成功",
   "data": {
-    "autoid": 123,
-    "tel": "13812345678",
-    "email": "user@example.com",
-    "username": "张三",
-    "idcard": "110101199003071234",
-    "bankcard": "6222020912345678901",
-    "khyh": "中国银行",
-    "khzh": "中关村支行",
-    "xyz": 100,
-    "writedate": "2026-01-15T10:30:00",
-    "recomcode": "REC123456",
-    "parent": "0xabcdef1234567890abcdef1234567890abcdef12",
+    "autoid": 1,
+    "address": "0x001",
+    "parentAddress": "0xparent",
+    "signature": null,
+    "tel": "13118181818",
+    "email": "1@163.com",
+    "username": "系统机器人(勿动)",
+    "idcard": "--",
+    "bankcard": "--",
+    "khyh": "--",
+    "khzh": "--",
+    "xyz": 80,
+    "writedate": "2019-12-03 13:00:00",
+    "recomcode": "888888",
+    "parent": "666666",
     "idcardstate": "completed",
-    "minlevel": "VIP1",
-    "member": "普通会员",
-    "wx": "wechat_account",
-    "wximg": "https://example.com/wx.png",
-    "zfb": "alipay_account",
-    "zfbimg": "https://example.com/zfb.png",
-    "areacode": "+86",
+    "minlevel": "0",
+    "member": "test001",
+    "wx": "567",
+    "wximg": "567",
+    "zfb": "567",
+    "zfbimg": "567",
+    "areacode": "86",
     "state": "enable",
     "disableinfo": null,
-    "imitate": "enable"
+    "imitate": "enable",
+    "directPeople": 277,
+    "unDirectPeople": 65,
+    "directCoinNum": "0",
+    "indirectPeople": 313,
+    "indirectCoinNum": "0",
+    "unIndirectPeople": 72,
+    "superuser": "enable",
+    "userIp": "183.94.150.15",
+    "registerIp": null,
+    "superuserGas": "0",
+    "discount": "0",
+    "tradNum": "0",
+    "cycleState": "loss",
+    "minerState": "disable",
+    "reputation": "100",
+    "flagWithdraw": 1,
+    "flagOrder": 1,
+    "territorial": null,
+    "nation": null,
+    "remark": null,
+    "salesmanName": null,
+    "flagVirtual": 0
   }
 }
 ```
 
 **返回字段说明（data 对象）**
 
+**基本信息**
+
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| autoid | Integer | 用户自增ID |
+| autoid | Integer | 用户自增ID（系统内部唯一标识） |
+| address | String | 钱包地址（机器人用户唯一标识） |
+| parentAddress | String | 上级推荐人的钱包地址 |
+| signature | String | 地址签名（用于验证地址所有权） |
+| username | String | 用户名/真实姓名 |
 | tel | String | 手机号码 |
 | email | String | 电子邮箱 |
-| username | String | 用户名/真实姓名 |
+| areacode | String | 国家区号（如 86 代表中国） |
+
+**身份认证信息**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
 | idcard | String | 身份证号码 |
+| idcardstate | String | 实名认证状态：<br/>- no：未认证<br/>- review：审核中<br/>- completed：已完成<br/>- reject：驳回 |
+| zm | String | 证件正面照片URL |
+| fm | String | 证件反面照片URL |
+| sc | String | 手持证件照片URL |
+
+**账户状态**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| state | String | 账户状态：<br/>- enable：启用<br/>- disable：禁用 |
+| disableinfo | String | 账户禁用原因 |
+| minerState | String | 矿机状态：enable 或 disable |
+| cycleState | String | 周期状态：如 loss、profit 等 |
+
+**等级与权限**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| minlevel | String | 会员等级（0, VIP1, VIP2 等） |
+| member | String | 账户类型/会员身份 |
+| superuser | String | 是否超级用户：enable 或 disable |
+| imitate | String | 是否签约币币交易：<br/>- enable：已签约<br/>- disable：未签约 |
+| flagWithdraw | Integer | 是否允许提币：1=允许，0=禁止 |
+| flagOrder | Integer | 是否允许下单：1=允许，0=禁止 |
+| flagVirtual | Integer | 是否为虚拟用户：1=是，0=否 |
+
+**推荐关系与业绩**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| recomcode | String | 用户的推荐码（邀请他人时使用） |
+| parent | String | 上级推荐人标识 |
+| directPeople | Integer | 直接推荐人数 |
+| unDirectPeople | Integer | 未激活的直接推荐人数 |
+| indirectPeople | Integer | 间接推荐人数 |
+| unIndirectPeople | Integer | 未激活的间接推荐人数 |
+| directCoinNum | String | 直接推荐的成交额 |
+| indirectCoinNum | String | 间接推荐的成交额 |
+
+**交易与结算**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| tradNum | String | 交易笔数 |
+| discount | String | 手续费折扣率 |
+| superuserGas | String | 超级用户手续费 |
+| xyz | Integer | 信用值（0-100） |
+| reputation | String | 信誉评分 |
+
+**收款方式**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
 | bankcard | String | 银行卡号 |
 | khyh | String | 开户银行 |
 | khzh | String | 开户支行 |
-| xyz | Integer | 信用值 |
-| writedate | Date | 注册时间 |
-| recomcode | String | 推荐码（用户邀请他人时使用） |
-| parent | String | 上级推荐人的钱包地址 |
-| idcardstate | String | 实名认证状态（no：未认证；review：审核中；completed：已完成；reject：驳回） |
-| minlevel | String | 会员等级（VIP0, VIP1, VIP2 等） |
-| member | String | 账户类型 |
 | wx | String | 微信账号 |
-| wximg | String | 微信收款码图片地址 |
+| wximg | String | 微信收款码图片URL |
 | zfb | String | 支付宝账号 |
-| zfbimg | String | 支付宝收款码图片地址 |
-| areacode | String | 国家区号 |
-| state | String | 账户状态（enable：启用；disable：禁用） |
-| disableinfo | String | 禁用原因（账户被禁用时显示） |
-| imitate | String | 是否签约币币交易（enable：已签约；disable：未签约） |
+| zfbimg | String | 支付宝收款码图片URL |
+
+**地理位置信息**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| userIp | String | 用户当前IP地址 |
+| registerIp | String | 用户注册时的IP地址 |
+| territorial | String | 用户所在领地 |
+| nation | String | 用户所在国家 |
+
+**其他字段**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| writedate | Date | 注册时间 |
+| remark | String | 备注信息 |
+| salesmanName | String | 销售员名称 |
+| googlekey | String | 谷歌验证器密钥 |
+| loginpwd | String | 登录密码（已加密） |
+| tradpwd | String | 交易密码（已加密） |
 
 **错误响应示例**
+
+参数丢失错误：
 ```json
 {
   "code": 1,
@@ -436,19 +548,31 @@ authorization: your-auth-key
 }
 ```
 
+授权错误：
+```json
+{
+  "code": 401,
+  "msg": "无权限访问",
+  "data": null
+}
+```
+
 **可能的错误码**
 
 | 错误码 | 说明 |
 |--------|------|
-| 1 | 参数丢失（address 为空） |
-| 401 | 未授权（缺少或错误的 authorization 字段） |
+| 1 | 参数丢失（address 为空或格式错误） |
+| 401 | 未授权（缺少 authorization 字段） |
 | 1001 | 无权限访问（authorization 值不正确） |
+| 500 | 服务器错误（用户不存在或数据库异常） |
 
 **注意事项**
 - `address` 参数是必填的，不能为空
-- 返回的用户信息中，某些敏感字段（如完整的银行卡号、身份证号）可能被部分隐藏
-- 如果用户不存在，API 返回 null 数据
-- 实名认证状态为 "reject" 时，`disableinfo` 字段会包含驳回原因
+- 返回的某些字段可能为 null 或空字符串，表示该信息未填写
+- 敏感字段（如银行卡号、身份证号）在实际应用中可能被部分隐藏
+- `flagWithdraw` 和 `flagOrder` 为 0 时表示该用户被限制相关操作
+- `state` 为 "disable" 且 `disableinfo` 有值时，表示账户被禁用及原因
+- 推荐关系字段可用于统计用户的推广业绩
 
 ---
 
