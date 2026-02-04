@@ -1,15 +1,16 @@
 # Coincasso REST API 文档（机器人接口）
 
-本文档说明 RobotController 提供的三个 REST API 接口，用于获取交易对的实时价格、K线数据和成交订单。
+本文档说明 RobotController 提供的 REST API 接口，用于获取交易对的实时价格、K线数据、成交订单以及用户管理。
 
 ---
 
 ## 基础信息
 
 - **Base URL**: `https://m.ibmxi.com/api`
-- **请求方式**: GET
+- **请求方式**: GET / POST
 - **返回格式**: JSON
 - **字符编码**: UTF-8
+- **授权方式**: Header 中包含 `authorization` 字段（用于用户相关接口）
 
 ---
 
@@ -255,9 +256,205 @@ GET /robot/orders?maincoin=USDT&tradcoin=BTC&count=20
 
 ---
 
-## 4. 通用说明
+## 4. 用户注册 `/robot/user/reg`
 
-### 4.1 响应结构
+注册新用户（机器人用户），需要提供钱包地址、上级推荐人地址和签名。
+
+### 4.1 请求信息
+
+**接口地址**
+```
+POST /robot/user/reg
+```
+
+**授权要求**
+- 必须在请求 Header 中包含 `authorization` 字段
+- `authorization` 值应与服务器配置的密钥相匹配
+
+**请求参数**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例 |
+|--------|------|------|------|------|
+| address | String | 是 | 用户钱包地址（新用户唯一标识） | 0x1234567890abcdef... |
+| parentAddress | String | 是 | 上级推荐人的钱包地址 | 0xabcdef1234567890... |
+| signature | String | 是 | 地址签名（用于验证地址所有权） | 0x签名数据 |
+
+**请求示例**
+```bash
+curl -X POST https://m.ibmxi.com/api/robot/user/reg \
+  -H "Content-Type: application/json" \
+  -H "authorization: your-auth-key" \
+  -d '{
+    "address": "0x1234567890abcdef1234567890abcdef12345678",
+    "parentAddress": "0xabcdef1234567890abcdef1234567890abcdef12",
+    "signature": "0x签名结果"
+  }'
+```
+
+### 4.2 返回数据
+
+**成功响应示例**
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": "0x1234567890abcdef1234567890abcdef12345678"
+}
+```
+
+**返回字段说明**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| code | Integer | 状态码（200：成功） |
+| msg | String | 返回消息 |
+| data | String | 返回注册的钱包地址 |
+
+**错误响应示例**
+```json
+{
+  "code": 1,
+  "msg": "参数丢失",
+  "data": null
+}
+```
+
+**可能的错误码**
+
+| 错误码 | 说明 |
+|--------|------|
+| 1 | 参数丢失（address、parentAddress 或 signature 为空） |
+| 401 | 未授权（缺少或错误的 authorization 字段） |
+| 1001 | 无权限访问（authorization 值不正确） |
+
+**注意事项**
+- `address`、`parentAddress` 和 `signature` 都是必填项，不能为空
+- 地址应为有效的以太坊地址格式（0x开头，共42个字符）
+- 签名用于验证用户对该地址的所有权
+- 首次注册会自动记录用户的IP地址和地理位置信息
+
+---
+
+## 5. 获取用户信息 `/robot/user/info`
+
+根据钱包地址获取用户的详细信息。
+
+### 5.1 请求信息
+
+**接口地址**
+```
+GET /robot/user/info
+```
+
+**授权要求**
+- 必须在请求 Header 中包含 `authorization` 字段
+- `authorization` 值应与服务器配置的密钥相匹配
+
+**请求参数**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例 |
+|--------|------|------|------|------|
+| address | String | 是 | 用户钱包地址 | 0x1234567890abcdef... |
+
+**请求示例**
+```
+GET /robot/user/info?address=0x1234567890abcdef1234567890abcdef12345678
+
+请求 Header：
+authorization: your-auth-key
+```
+
+### 5.2 返回数据
+
+**成功响应示例**
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "autoid": 123,
+    "tel": "13812345678",
+    "email": "user@example.com",
+    "username": "张三",
+    "idcard": "110101199003071234",
+    "bankcard": "6222020912345678901",
+    "khyh": "中国银行",
+    "khzh": "中关村支行",
+    "xyz": 100,
+    "writedate": "2026-01-15T10:30:00",
+    "recomcode": "REC123456",
+    "parent": "0xabcdef1234567890abcdef1234567890abcdef12",
+    "idcardstate": "completed",
+    "minlevel": "VIP1",
+    "member": "普通会员",
+    "wx": "wechat_account",
+    "wximg": "https://example.com/wx.png",
+    "zfb": "alipay_account",
+    "zfbimg": "https://example.com/zfb.png",
+    "areacode": "+86",
+    "state": "enable",
+    "disableinfo": null,
+    "imitate": "enable"
+  }
+}
+```
+
+**返回字段说明（data 对象）**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| autoid | Integer | 用户自增ID |
+| tel | String | 手机号码 |
+| email | String | 电子邮箱 |
+| username | String | 用户名/真实姓名 |
+| idcard | String | 身份证号码 |
+| bankcard | String | 银行卡号 |
+| khyh | String | 开户银行 |
+| khzh | String | 开户支行 |
+| xyz | Integer | 信用值 |
+| writedate | Date | 注册时间 |
+| recomcode | String | 推荐码（用户邀请他人时使用） |
+| parent | String | 上级推荐人的钱包地址 |
+| idcardstate | String | 实名认证状态（no：未认证；review：审核中；completed：已完成；reject：驳回） |
+| minlevel | String | 会员等级（VIP0, VIP1, VIP2 等） |
+| member | String | 账户类型 |
+| wx | String | 微信账号 |
+| wximg | String | 微信收款码图片地址 |
+| zfb | String | 支付宝账号 |
+| zfbimg | String | 支付宝收款码图片地址 |
+| areacode | String | 国家区号 |
+| state | String | 账户状态（enable：启用；disable：禁用） |
+| disableinfo | String | 禁用原因（账户被禁用时显示） |
+| imitate | String | 是否签约币币交易（enable：已签约；disable：未签约） |
+
+**错误响应示例**
+```json
+{
+  "code": 1,
+  "msg": "参数丢失",
+  "data": null
+}
+```
+
+**可能的错误码**
+
+| 错误码 | 说明 |
+|--------|------|
+| 1 | 参数丢失（address 为空） |
+| 401 | 未授权（缺少或错误的 authorization 字段） |
+| 1001 | 无权限访问（authorization 值不正确） |
+
+**注意事项**
+- `address` 参数是必填的，不能为空
+- 返回的用户信息中，某些敏感字段（如完整的银行卡号、身份证号）可能被部分隐藏
+- 如果用户不存在，API 返回 null 数据
+- 实名认证状态为 "reject" 时，`disableinfo` 字段会包含驳回原因
+
+---
+
+## 6. 通用说明
+
+### 6.1 响应结构
 
 所有接口返回统一的响应结构：
 
@@ -275,7 +472,7 @@ GET /robot/orders?maincoin=USDT&tradcoin=BTC&count=20
 | msg | String | 返回消息 |
 | data | Object/Array | 返回数据（具体结构见各接口说明） |
 
-### 4.2 错误码说明
+### 6.2 错误码说明
 
 | 错误码 | 说明 |
 |--------|------|
@@ -283,7 +480,7 @@ GET /robot/orders?maincoin=USDT&tradcoin=BTC&count=20
 | 500 | 服务器内部错误 |
 | 参数错误 | 缺少必填参数或参数格式不正确 |
 
-### 4.3 精度说明
+### 6.3 精度说明
 
 - **价格精度（priceAccuracy）**：从 `/robot/last` 接口返回，表示价格保留的小数位数
 - **数量精度（amountAccuracy）**：从 `/robot/last` 接口返回，表示数量保留的小数位数
@@ -304,25 +501,25 @@ const amount = 1.23456789;
 const formattedAmount = amount.toFixed(amountAccuracy); // "1.235"
 ```
 
-### 4.4 使用建议
+### 6.4 使用建议
 
 1. **获取交易对信息流程**：
-   - 首先调用 `/robot/last` 获取交易对的基础信息（价格、精度等）
-   - 根据需要调用 `/robot/last_count` 获取K线数据用于图表展示
-   - 调用 `/robot/orders` 获取最近成交订单用于展示市场活跃度
+    - 首先调用 `/robot/last` 获取交易对的基础信息（价格、精度等）
+    - 根据需要调用 `/robot/last_count` 获取K线数据用于图表展示
+    - 调用 `/robot/orders` 获取最近成交订单用于展示市场活跃度
 
 2. **轮询建议**：
-   - 价格信息（`/robot/last`）：建议每 3-5 秒轮询一次
-   - K线数据（`/robot/last_count`）：建议每 10-30 秒轮询一次（根据周期调整）
-   - 成交订单（`/robot/orders`）：建议每 5-10 秒轮询一次
+    - 价格信息（`/robot/last`）：建议每 3-5 秒轮询一次
+    - K线数据（`/robot/last_count`）：建议每 10-30 秒轮询一次（根据周期调整）
+    - 成交订单（`/robot/orders`）：建议每 5-10 秒轮询一次
 
 3. **性能优化**：
-   - 如需实时推送，建议使用 WebSocket 接口（见 `ws-api.md`）
-   - REST API 适合初始化数据和按需查询场景
+    - 如需实时推送，建议使用 WebSocket 接口（见 `ws-api.md`）
+    - REST API 适合初始化数据和按需查询场景
 
 ---
 
-## 5. 完整示例（JavaScript）
+## 7. 完整示例（JavaScript）
 
 ```javascript
 // 基础配置
@@ -332,78 +529,78 @@ const TRADCOIN = 'BTC';
 
 // 1. 获取最新价格
 async function getLastPrice() {
-  const response = await fetch(
-    `${BASE_URL}/last?maincoin=${MAINCOIN}&tradcoin=${TRADCOIN}`
-  );
-  const result = await response.json();
-  
-  if (result.code === 200) {
-    const coinInfo = result.data;
-    console.log('当前价格:', coinInfo.price);
-    console.log('价格精度:', coinInfo.priceAccuracy);
-    console.log('数量精度:', coinInfo.amountAccuracy);
-    return coinInfo;
-  } else {
-    console.error('获取价格失败:', result.msg);
-    return null;
-  }
+    const response = await fetch(
+        `${BASE_URL}/last?maincoin=${MAINCOIN}&tradcoin=${TRADCOIN}`
+    );
+    const result = await response.json();
+
+    if (result.code === 200) {
+        const coinInfo = result.data;
+        console.log('当前价格:', coinInfo.price);
+        console.log('价格精度:', coinInfo.priceAccuracy);
+        console.log('数量精度:', coinInfo.amountAccuracy);
+        return coinInfo;
+    } else {
+        console.error('获取价格失败:', result.msg);
+        return null;
+    }
 }
 
 // 2. 获取K线数据
 async function getKlineData(mine = '1m', count = 20) {
-  const response = await fetch(
-    `${BASE_URL}/last_count?maincoin=${MAINCOIN}&tradcoin=${TRADCOIN}&count=${count}&mine=${mine}`
-  );
-  const result = await response.json();
-  
-  if (result.code === 200) {
-    console.log('K线数据:', result.data);
-    return result.data;
-  } else {
-    console.error('获取K线失败:', result.msg);
-    return [];
-  }
+    const response = await fetch(
+        `${BASE_URL}/last_count?maincoin=${MAINCOIN}&tradcoin=${TRADCOIN}&count=${count}&mine=${mine}`
+    );
+    const result = await response.json();
+
+    if (result.code === 200) {
+        console.log('K线数据:', result.data);
+        return result.data;
+    } else {
+        console.error('获取K线失败:', result.msg);
+        return [];
+    }
 }
 
 // 3. 获取成交订单
 async function getOrders(count = 20) {
-  const response = await fetch(
-    `${BASE_URL}/orders?maincoin=${MAINCOIN}&tradcoin=${TRADCOIN}&count=${count}`
-  );
-  const result = await response.json();
-  
-  if (result.code === 200) {
-    console.log('成交订单:', result.data);
-    return result.data;
-  } else {
-    console.error('获取订单失败:', result.msg);
-    return [];
-  }
+    const response = await fetch(
+        `${BASE_URL}/orders?maincoin=${MAINCOIN}&tradcoin=${TRADCOIN}&count=${count}`
+    );
+    const result = await response.json();
+
+    if (result.code === 200) {
+        console.log('成交订单:', result.data);
+        return result.data;
+    } else {
+        console.error('获取订单失败:', result.msg);
+        return [];
+    }
 }
 
 // 初始化
 async function init() {
-  // 获取基础信息
-  const coinInfo = await getLastPrice();
-  
-  // 获取1分钟K线（最近20条）
-  const klineData = await getKlineData('1m', 20);
-  
-  // 获取最近成交订单（20条）
-  const orders = await getOrders(20);
-  
-  // 根据精度格式化显示
-  if (coinInfo) {
-    const price = parseFloat(coinInfo.price);
-    const formattedPrice = price.toFixed(coinInfo.priceAccuracy);
-    console.log('格式化价格:', formattedPrice);
-  }
+    // 获取基础信息
+    const coinInfo = await getLastPrice();
+
+    // 获取1分钟K线（最近20条）
+    const klineData = await getKlineData('1m', 20);
+
+    // 获取最近成交订单（20条）
+    const orders = await getOrders(20);
+
+    // 根据精度格式化显示
+    if (coinInfo) {
+        const price = parseFloat(coinInfo.price);
+        const formattedPrice = price.toFixed(coinInfo.priceAccuracy);
+        console.log('格式化价格:', formattedPrice);
+    }
 }
 
 // 启动定时轮询
 setInterval(async () => {
-  await getLastPrice();
-  await getOrders(10);
+    await getLastPrice();
+    await getOrders(10);
 }, 5000); // 每5秒更新一次
 
 init();
@@ -411,18 +608,18 @@ init();
 
 ---
 
-## 6. 与 WebSocket API 的配合使用
+## 8. 与 WebSocket API 的配合使用
 
 建议结合使用 REST API 和 WebSocket API：
 
 - **初始化阶段**：使用 REST API 获取初始数据
-  - `/robot/last` 获取交易对信息和精度
-  - `/robot/last_count` 获取历史K线用于图表初始化
-  - `/robot/orders` 获取历史成交订单
+    - `/robot/last` 获取交易对信息和精度
+    - `/robot/last_count` 获取历史K线用于图表初始化
+    - `/robot/orders` 获取历史成交订单
 
 - **实时更新阶段**：使用 WebSocket 订阅实时推送
-  - 订阅 `USDT_BTC_trad_1m` 获取实时行情、委托和K线更新
-  - WebSocket 推送的数据包含 `buy`、`sell`、`top`、`info`、`kline` 等字段
+    - 订阅 `USDT_BTC_trad_1m` 获取实时行情、委托和K线更新
+    - WebSocket 推送的数据包含 `buy`、`sell`、`top`、`info`、`kline` 等字段
 
 详见 WebSocket API 文档：`doc/ws-api.md`
 
