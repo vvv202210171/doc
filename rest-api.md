@@ -6,7 +6,7 @@
 
 ## 基础信息
 
-- **Base URL**: `https://m.ibmxi.com/robot`
+- **Base URL**: `https://m.ibmxi.com/api`
 - **请求方式**: GET
 - **返回格式**: JSON
 - **字符编码**: UTF-8
