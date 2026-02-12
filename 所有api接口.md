@@ -76,7 +76,7 @@ cURL 示例：
 ```bash
 # 使用 Bearer token
 curl -X GET "https://m.ibmxi.com/api/robot/symbols?klineType=1m" \
-  -H "Authorization: <YOUR_TOKEN>" \
+  -H "Authorization: 202602041124" \
   -H "Accept: application/json"
 
 # 或使用测试 header 值
@@ -150,7 +150,7 @@ cURL 示例：
 
 ```bash
 curl -X GET "https://m.ibmxi.com/api/robot/last?maincoin=USDT&tradcoin=ETH" \
-  -H "Authorization: <YOUR_TOKEN>" \
+  -H "Authorization: 202602041124" \
   -H "Accept: application/json"
 ```
 
@@ -229,7 +229,7 @@ cURL 示例：
 
 ```bash
 curl -X GET "https://m.ibmxi.com/api/robot/last_count?maincoin=USDT&tradcoin=ETH&count=20&mine=1" \
-  -H "Authorization: <YOUR_TOKEN>" \
+  -H "Authorization: 202602041124" \
   -H "Accept: application/json"
 ```
 
@@ -295,7 +295,7 @@ cURL 示例：
 
 ```bash
 curl -X GET "https://m.ibmxi.com/api/robot/orders?maincoin=USDT&tradcoin=ETH&count=10" \
-  -H "Authorization: <YOUR_TOKEN>" \
+  -H "Authorization: 202602041124" \
   -H "Accept: application/json"
 ```
 
