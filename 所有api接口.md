@@ -352,10 +352,10 @@ Content-Type: application/json
 cURL 示例：
 
 ```bash
-curl -X POST "https://m.ibmxi.com/api/robot/user/reg" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"address":"0xabc...","parentAddress":"0xparent...","signature":"<SIG>"}'
+curl --location 'https://m.ibmxi.com/api/robot/user/reg' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{"address":"0xabc","parentAddress":"0x001...","signature":"<SIG>"}'
 ```
 
 成功响应：
@@ -390,9 +390,9 @@ GET https://m.ibmxi.com/api/robot/user/info?address=0xabc...
 cURL 示例：
 
 ```bash
-curl -X GET "https://m.ibmxi.com/api/robot/user/info?address=0xabc..." \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Accept: application/json"
+curl --location 'https://m.ibmxi.com/api/robot/user/info?address=0xabc' \
+--header 'Authorization: 202602041124' \
+--header 'Accept: application/json'
 ```
 
 返回类型：R<UsUserPo>
@@ -464,10 +464,10 @@ UsUserPo 字段（截取主要常用字段，详见 `com.sdt.po.UsUserPo`）：
 cURL 示例：
 
 ```bash
-curl -X POST "https://m.ibmxi.com/api/robot/user/recharge" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"address":"0xabc...","coin":"USDT","number":"100","signature":"<SIG>"}'
+curl --location 'https://m.ibmxi.com/api/robot/user/recharge' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{"address":"0xabc","coin":"USDT","number":"100","signature":"<SIG>"}'
 ```
 
 返回类型：R<UsAccountPo>
@@ -523,10 +523,10 @@ curl -X POST "https://m.ibmxi.com/api/robot/user/recharge" \
 cURL 示例：
 
 ```bash
-curl -X POST "https://m.ibmxi.com/api/robot/user/withdraw" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"address":"0xabc...","coin":"USDT","number":"10","signature":"<SIG>"}'
+curl --location 'https://m.ibmxi.com/api/robot/user/withdraw' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{"address":"0xabc","coin":"USDT","number":"10","signature":"<SIG>"}'
 ```
 
 返回：{"code":0,"data":"成功"}
@@ -552,9 +552,9 @@ GET https://m.ibmxi.com/api/robot/user/assets?address=0xabc...&coin=USDT
 cURL 示例：
 
 ```bash
-curl -X GET "https://m.ibmxi.com/api/robot/user/assets?address=0xabc...&coin=USDT" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Accept: application/json"
+curl --location 'https://m.ibmxi.com/api/robot/user/assets?address=0xabc&signature=%3CSIG%3E' \
+--header 'Authorization: 202602041124' \
+--header 'Accept: application/json'
 ```
 
 返回类型：R<List<UsAccountPo>>
@@ -600,10 +600,17 @@ curl -X GET "https://m.ibmxi.com/api/robot/user/assets?address=0xabc...&coin=USD
 cURL 示例（限价买入）：
 
 ```bash
-curl -X POST "https://m.ibmxi.com/api/robot/buyLimit" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"maincoin":"USDT","tradcoin":"ETH","number":"1.0","price":"1800.00"}'
+curl --location 'https://m.ibmxi.com/api/robot/buyLimit' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{
+    "maincoin": "USDT",
+    "tradcoin": "XRP",
+    "number": "1.0",
+    "price": "3.00",
+    "address":"0x003",
+    "signature": "11111"
+}'
 ```
 
 ---
@@ -628,10 +635,17 @@ curl -X POST "https://m.ibmxi.com/api/robot/buyLimit" \
 cURL 示例（限价卖出）：
 
 ```bash
-curl -X POST "https://m.ibmxi.com/api/robot/sellLimit" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"maincoin":"USDT","tradcoin":"ETH","number":"1.0","price":"1800.00"}'
+curl --location 'https://m.ibmxi.com/api/robot/sellLimit' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{
+    "maincoin": "USDT",
+    "tradcoin": "XRP",
+    "number": "1.0",
+    "price": "3.00",
+    "address":"0xabc",
+    "signature": "<SIG>"
+}'
 ```
 
 ---
@@ -655,10 +669,16 @@ curl -X POST "https://m.ibmxi.com/api/robot/sellLimit" \
 cURL 示例（市价买入）：
 
 ```bash
-curl -X POST "https://m.ibmxi.com/api/robot/buyMarket" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"maincoin":"USDT","tradcoin":"ETH","number":"1.0"}'
+curl --location 'https://m.ibmxi.com/api/robot/buyMarket' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{
+    "maincoin": "USDT",
+    "tradcoin": "ETH",
+    "number": "0.01",
+    "address":"0xabc",
+    "signature": "<SIG>"
+}'
 ```
 
 ---
@@ -682,10 +702,16 @@ curl -X POST "https://m.ibmxi.com/api/robot/buyMarket" \
 cURL 示例（市价卖出）：
 
 ```bash
-curl -X POST "https://m.ibmxi.com/api/robot/sellMarket" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"maincoin":"USDT","tradcoin":"ETH","number":"0.5"}'
+curl --location 'https://m.ibmxi.com/api/robot/sellMarket' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{
+    "maincoin": "USDT",
+    "tradcoin": "ETH",
+    "number": "0.01",
+    "address":"0xabc",
+    "signature": "<SIG>"
+}'
 ```
 
 ---
@@ -748,9 +774,9 @@ TrOrderPo 常用字段（见 `com.sdt.po.TrOrderPo`）：
 cURL 示例：
 
 ```bash
-curl -X GET "https://m.ibmxi.com/api/robot/trad/order?page=1&limit=10" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Accept: application/json"
+curl --location 'https://m.ibmxi.com/api/robot/trad/order?page=1&limit=10&address=0xabc&signature=%3CSIG%3E' \
+--header 'Authorization: 202602041124' \
+--header 'Accept: application/json'
 ```
 
 ---
@@ -821,9 +847,9 @@ TrEntrustPo 常用字段（见 `com.sdt.po.TrEntrustPo`）：
 cURL 示例：
 
 ```bash
-curl -X GET "https://m.ibmxi.com/api/robot/trad/entrust?page=1&limit=10" \
-  -H "Authorization: <YOUR_TOKEN>" \
-  -H "Accept: application/json"
+curl --location 'https://m.ibmxi.com/api/robot/trad/entrust?page=1&limit=10&address=0xabc&signature=%3CSIG%3E' \
+--header 'Authorization: 202602041124' \
+--header 'Accept: application/json'
 ```
 
 ---
