@@ -107,7 +107,7 @@ CoinTypeVo 常见字段（截取自实体/mapper 返回示例）：
 示例响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": [
     {
       "autoid": 101,
@@ -181,7 +181,7 @@ CoinBo 字段（来自 `com.sdt.bo.CoinBo`）重要字段：
 示例成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": {
     "autoid": 101,
     "tradcoin": "ETH",
@@ -249,7 +249,7 @@ KLineBo（`com.sdt.bo.KLineBo`）字段：
 示例成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": [
     {
       "wdate": "2026-02-12T10:10:00Z",
@@ -315,7 +315,7 @@ top_order_date2 常见字段（由实现设置）：
 示例成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": [
     { "price": "1800.00", "type": "buy", "autoid": "167617920001", "number": "1.5", "wdate": "2026-02-12 10:11:30" },
     { "price": "1800.00", "type": "sell", "autoid": "167617920002", "number": "0.8", "wdate": "2026-02-12 10:11:31" }
@@ -361,7 +361,7 @@ curl -X POST "https://m.ibmxi.com/api/robot/user/reg" \
 成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": "0xabc...",
   "msg": "成功"
 }
@@ -420,7 +420,7 @@ UsUserPo 字段（截取主要常用字段，详见 `com.sdt.po.UsUserPo`）：
 示例成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": {
     "autoid": 1001,
     "tel": "13800000000",
@@ -484,7 +484,7 @@ curl -X POST "https://m.ibmxi.com/api/robot/user/recharge" \
 示例成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": {
     "autoid": 501,
     "coin": "USDT",
@@ -562,7 +562,7 @@ curl -X GET "https://m.ibmxi.com/api/robot/user/assets?address=0xabc...&coin=USD
 示例成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": [
     { "autoid": 501, "coin": "USDT", "usable": "1200.50", "disable": "0.00", "member": "M000123" },
     { "autoid": 502, "coin": "BTC", "usable": "0.050", "disable": "0.000", "member": "M000123" }
@@ -721,7 +721,7 @@ TrOrderPo 常用字段（见 `com.sdt.po.TrOrderPo`）：
 示例成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": {
     "total": 123,
     "current": 1,
@@ -789,7 +789,7 @@ TrEntrustPo 常用字段（见 `com.sdt.po.TrEntrustPo`）：
 示例成功响应：
 
 {
-  "code": 0,
+  "code": 200,
   "data": {
     "total": 45,
     "current": 1,
@@ -834,7 +834,7 @@ curl -X GET "https://m.ibmxi.com/api/robot/trad/entrust?page=1&limit=10" \
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| code | int | 状态码，0 表示成功，非 0 表示失败 |
+| code | int | 状态码，200 表示成功，非 0 表示失败 |
 | msg | string | 国际化提示信息（LanguagesUtil） |
 | data | T | 实际返回的负载（对象/数组/字符串等） |
 
@@ -844,7 +844,7 @@ curl -X GET "https://m.ibmxi.com/api/robot/trad/entrust?page=1&limit=10" \
 
 ```
 {
-  "code": 0,
+  "code": 200,
   "data": <payload>,
   "msg": "成功"
 }
