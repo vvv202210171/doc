@@ -310,6 +310,20 @@ curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/create' \
 }'
 ```
 
+**请求示例 - 支付宝：**
+```bash
+curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/create' \
+--header 'Content-Type: application/json' \
+--header 'token: UAT20283084048911319041772421382530' \
+--data-raw '{
+  "collWay": "alipay",
+  "alipayUrl": "https://example.com/alipay_qrcode.png",
+  "alipayAcc": "alipay_account@example.com",
+  "alipayName": "李四",
+  "tag": "支付宝账户"
+}'
+```
+
 **请求示例 - 银行卡：**
 ```bash
 curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/create' \
