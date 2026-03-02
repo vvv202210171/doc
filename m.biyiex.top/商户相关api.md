@@ -4,6 +4,8 @@
 
 **更新时间：** 2026年3月2日
 
+**认证方式：** `token: <your_token>`（请求头）
+
 ---
 
 ## 📑 目录
@@ -44,7 +46,7 @@
 **请求头：**
 ```
 Content-Type: application/json
-Authorization: Bearer <your_token>
+token: <your_token>
 ```
 
 **请求参数（Body）：**
@@ -59,7 +61,7 @@ Authorization: Bearer <your_token>
 ```bash
 curl --location --request POST 'https://www.biyiex.top/api/c2c/merchant/create' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer YOUR_TOKEN' \
+--header 'token: UAT20283084048911319041772421382530' \
 --data-raw '{
   "name": "我的商户",
   "phone": "13800138000",
@@ -110,7 +112,7 @@ curl --location --request POST 'https://www.biyiex.top/api/c2c/merchant/create' 
 **请求头：**
 ```
 Content-Type: application/json
-Authorization: Bearer <your_token>
+token: <your_token>
 ```
 
 **请求参数（Body）：**
@@ -124,7 +126,7 @@ Authorization: Bearer <your_token>
 ```bash
 curl --location --request POST 'https://www.biyiex.top/api/c2c/merchant/recommit' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer YOUR_TOKEN' \
+--header 'token: UAT20283084048911319041772421382530' \
 --data-raw '{
   "name": "我的商户-修改版",
   "phone": "13900139000"
@@ -145,12 +147,15 @@ curl --location --request POST 'https://www.biyiex.top/api/c2c/merchant/recommit
 
 **权限要求：** ✅ 需要认证
 
-**请求参数：** 无（从 token 中提取 memberNo）
+**请求头：**
+```
+token: <your_token>
+```
 
 **请求示例（Curl）：**
 ```bash
 curl --location --request GET 'https://www.biyiex.top/api/c2c/merchant/detail' \
---header 'Authorization: Bearer YOUR_TOKEN'
+--header 'token: UAT20283084048911319041772421382530'
 ```
 
 ---
@@ -192,8 +197,6 @@ curl --location --request GET 'https://www.biyiex.top/api/c2c/merchant/code/MCH2
 
 **权限要求：** ❌ 无需认证
 
-**请求参数：** 无
-
 **请求示例（Curl）：**
 ```bash
 curl --location --request GET 'https://www.biyiex.top/api/c2c/merchant/margin'
@@ -227,15 +230,13 @@ curl --location --request GET 'https://www.biyiex.top/api/c2c/merchant/margin'
 
 **请求头：**
 ```
-Authorization: Bearer <your_token>
+token: <your_token>
 ```
-
-**请求参数：** 无（Body 为空）
 
 **请求示例（Curl）：**
 ```bash
 curl --location --request POST 'https://www.biyiex.top/api/c2c/merchant/update-margin' \
---header 'Authorization: Bearer YOUR_TOKEN'
+--header 'token: UAT20283084048911319041772421382530'
 ```
 
 ---
@@ -257,7 +258,7 @@ curl --location --request POST 'https://www.biyiex.top/api/c2c/merchant/update-m
 **请求头：**
 ```
 Content-Type: application/json
-Authorization: Bearer <your_token>
+token: <your_token>
 ```
 
 **请求参数（Body）：**
@@ -274,7 +275,7 @@ Authorization: Bearer <your_token>
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| wxUrl | string | ✅ | 微信收款二维码 URL 或 Base64 |
+| wxUrl | string | ✅ | 微信收款二维码 URL |
 | wxAcc | string | ✅ | 微信账户/微信号 |
 | wxName | string | ✅ | 微信账户真实姓名 |
 
@@ -282,24 +283,24 @@ Authorization: Bearer <your_token>
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| alipayUrl | string | ✅ | 支付宝收款二维码 URL 或 Base64 |
-| alipayAcc | string | ✅ | 支付宝账户/支付宝账号 |
+| alipayUrl | string | ✅ | 支付宝收款二维码 URL |
+| alipayAcc | string | ✅ | 支付宝账户 |
 | alipayName | string | ✅ | 支付宝账户真实姓名 |
 
 #### 银行卡收款方式专属参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| bankName | string | ✅ | 开户银行名称，例如 `中国工商银行` |
-| bankAcc | string | ✅ | 银行账户号，例如 `6222022409001234567` |
+| bankName | string | ✅ | 开户银行名称 |
+| bankAcc | string | ✅ | 银行账户号 |
 | bankHolder | string | ✅ | 持卡人姓名 |
-| bankAddr | string | ❌ | 开户行地址，例如 `北京市朝阳区支行` |
+| bankAddr | string | ❌ | 开户行地址 |
 
 **请求示例 - 微信：**
 ```bash
 curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/create' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer YOUR_TOKEN' \
+--header 'token: UAT20283084048911319041772421382530' \
 --data-raw '{
   "collWay": "wx",
   "wxUrl": "https://example.com/wx_qrcode.png",
@@ -313,7 +314,7 @@ curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/create' \
 ```bash
 curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/create' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer YOUR_TOKEN' \
+--header 'token: UAT20283084048911319041772421382530' \
 --data-raw '{
   "collWay": "bank",
   "bankName": "中国工商银行",
@@ -332,11 +333,16 @@ curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/create' \
 
 **请求方法：** `GET`
 
-**请求地址：** `/c2c/collway/unbind`
+**请求地址：** `/c2c/collway/unbind?id={id}`
 
 **完整 URL：** `https://www.biyiex.top/api/c2c/collway/unbind?id={id}`
 
 **权限要求：** ✅ 需要认证
+
+**请求头：**
+```
+token: <your_token>
+```
 
 **请求参数（Query）：**
 
@@ -347,7 +353,7 @@ curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/create' \
 **请求示例（Curl）：**
 ```bash
 curl --location --request GET 'https://www.biyiex.top/api/c2c/collway/unbind?id=1' \
---header 'Authorization: Bearer YOUR_TOKEN'
+--header 'token: UAT20283084048911319041772421382530'
 ```
 
 ---
@@ -364,12 +370,15 @@ curl --location --request GET 'https://www.biyiex.top/api/c2c/collway/unbind?id=
 
 **权限要求：** ✅ 需要认证
 
-**请求参数：** 无
+**请求头：**
+```
+token: <your_token>
+```
 
 **请求示例（Curl）：**
 ```bash
 curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/all' \
---header 'Authorization: Bearer YOUR_TOKEN'
+--header 'token: UAT20283084048911319041772421382530'
 ```
 
 ---
@@ -388,10 +397,7 @@ curl --location --request POST 'https://www.biyiex.top/api/c2c/collway/all' \
 
 **权限要求：** ✅ 需要认证（需要登录）
 
-**请求头：**
-```
-Authorization: Bearer <your_token>
-```
+
 
 **请求参数（Form-Data）：**
 
@@ -403,28 +409,19 @@ Authorization: Bearer <your_token>
 
 | 格式 | 扩展名 | 用途 |
 |------|--------|------|
-| GIF | .gif | 动画图片 |
-| PNG | .png | 透明图片 |
 | JPEG | .jpg, .jpeg | 照片 |
+| PNG | .png | 透明图片 |
+| GIF | .gif | 动画图片 |
 | SVG | .svg | 矢量图 |
 | BMP | .bmp | 位图 |
 | TIFF | .tiff | 高质量图像 |
-| 其他 | .dxf, .pcx, .ufo, .tga, .raw, .ai, .fpx, .eps | 专业格式 |
 
 **请求示例（Curl）：**
 ```bash
 curl --location --request POST 'https://www.biyiex.top/api/res/upload' \
---header 'Authorization: Bearer YOUR_TOKEN' \
+--header 'token: UAT20283084048911319041772421382530' \
 --form 'imgurl=@"/path/to/image.jpg"'
 ```
-
-**请求示例（使用 Postman）：**
-1. 请求方法：POST
-2. URL：`https://www.biyiex.top/api/res/upload`
-3. Headers：`Authorization: Bearer YOUR_TOKEN`
-4. Body：选择 form-data 模式
-5. 添加字段：`imgurl` (type: File)，选择要上传的图片文件
-6. 点击 Send
 
 **响应示例（成功 - 200）：**
 ```json
@@ -444,15 +441,6 @@ curl --location --request POST 'https://www.biyiex.top/api/res/upload' \
 | 参数 | 类型 | 说明 |
 |------|------|------|
 | resseq | string | 资源序列号，用于后续预览和引用 |
-
-**错误响应：**
-
-| 错误 | 说明 | 解决方案 |
-|------|------|--------|
-| 参数错误 | 未提供图片文件 | 检查是否正确上传了图片文件 |
-| 不支持的文件类型 | 上传的文件格式不在允许列表中 | 只上传支持的图片格式（gif, png, jpg, jpeg 等） |
-| 401 | token 无效或过期 | 重新登录获取有效的 token |
-| 500 | 服务器错误 | 检查文件大小是否过大，联系技术支持 |
 
 ---
 
@@ -482,8 +470,7 @@ curl --location --request POST 'https://www.biyiex.top/api/res/upload' \
 https://www.biyiex.top/api/res/preview/RES20260302001001
 
 # 或用 curl 下载
-curl -H 'Authorization: Bearer YOUR_TOKEN' \
-  'https://www.biyiex.top/api/res/preview/RES20260302001001' \
+curl 'https://www.biyiex.top/api/res/preview/RES20260302001001' \
   -o downloaded_image.jpg
 ```
 
@@ -492,31 +479,13 @@ curl -H 'Authorization: Bearer YOUR_TOKEN' \
 <img src="https://www.biyiex.top/api/res/preview/RES20260302001001" alt="预览图片" />
 ```
 
-**请求示例（JavaScript/Fetch）：**
-```javascript
-// 获取图片 URL
-const imageUrl = 'https://www.biyiex.top/api/res/preview/RES20260302001001';
-
-// 在 img 标签中显示
-document.getElementById('preview').src = imageUrl;
-
-// 或直接在浏览器中打开
-window.open(imageUrl);
-```
-
 **响应说明：**
 
 | 响应 | 说明 |
 |------|------|
-| 200 OK | 成功返回图片文件，响应体为图片二进制数据 |
-| 404 Not Found | 资源序列号不存在或已被删除 |
-| 500 Internal Server Error | 服务器错误或文件已丢失 |
-
-**缓存策略：**
-
-- **Cache-Control:** `max-age=604800`（7 天缓存）
-- **Last-Modified：** 文件最后修改时间
-- 首次加载后，7 天内重复访问同一资源不会重新下载
+| 200 OK | 成功返回图片文件 |
+| 404 Not Found | 资源不存在 |
+| 500 Internal Server Error | 服务器错误 |
 
 ---
 
@@ -527,14 +496,12 @@ window.open(imageUrl);
 所有需要认证的接口都需要在请求头中添加：
 
 ```
-Authorization: Bearer <your_token>
+token: <your_token>
 ```
 
-其中 `your_token` 是通过登录接口 `/member/loginByTelOrEmail` 获取的 token。
+其中 `your_token` 是通过登录接口获取的令牌。
 
 ### 通用错误响应
-
-所有失败响应都遵循以下格式：
 
 ```json
 {
@@ -548,47 +515,31 @@ Authorization: Bearer <your_token>
 |-------------|------|
 | 200 | 请求成功 |
 | 400 | 参数错误或业务验证失败 |
-| 401 | 未授权（token 过期或无效） |
+| 401 | 未授权（token 无效或过期） |
 | 404 | 资源不存在 |
 | 500 | 服务器内部错误 |
 
 ### 字段验证规则
 
 #### 商户类型（type）
-
-| 值 | 说明 |
-|----|------|
-| `PERSONAL` | 个人商户（默认） |
-| `PLATFORM` | 平台商户 |
+- `PERSONAL` - 个人商户（默认）
+- `PLATFORM` - 平台商户
 
 #### 商户状态（status）
-
-| 值 | 说明 |
-|----|------|
-| `PENDING` | 待审核 |
-| `ACTIVE` | 已激活 |
-| `SUSPENDED` | 已暂停 |
-| `REJECTED` | 已拒绝 |
-
-#### 审核状态（verifiedStatus）
-
-| 值 | 说明 |
-|----|------|
-| `1` | 待审核 |
-| `2` | 已通过 |
-| `3` | 已拒绝 |
+- `PENDING` - 待审核
+- `ACTIVE` - 已激活
+- `SUSPENDED` - 已暂停
+- `REJECTED` - 已拒绝
 
 #### 收款方式（collWay）
-
-| 值 | 说明 |
-|----|------|
-| `wx` | 微信支付 |
-| `alipay` | 支付宝 |
-| `bank` | 银行卡转账 |
+- `wx` - 微信支付
+- `alipay` - 支付宝
+- `bank` - 银行卡转账
 
 ---
 
-**文档版本：** v1.1  
+**文档版本：** v2.0  
 **最后更新：** 2026年3月2日  
+**认证方式：** token 请求头  
 **维护人：** 开发团队
 
