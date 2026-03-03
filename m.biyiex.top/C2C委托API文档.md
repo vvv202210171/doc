@@ -46,7 +46,6 @@ token: UAT20283084048911319041772421382530
 | buyRate | number | 条件 | 购买汇率，当 `direction=buy` 时必填 |
 | sellRate | number | 条件 | 出售汇率，当 `direction=sell` 时必填 |
 | supportedPaymentMethods | string | 否 | 支持的支付方式，多个用逗号分隔，如：`alipay,wx,bank` |
-| merchantCode | string | ✓ | 商户编码，用于关联商户信息 |
 
 **请求示例（cURL）- 创建买入委托：**
 ```bash
