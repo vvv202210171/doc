@@ -1,8 +1,8 @@
 
-1.导入t_assets到你们的数据库
-2.
-m.ibmxi.com/photo_2026-03-18_22-25-21.jpg
-3.调用你们的授权接口 去表t_assets寻找地址是否在这个表里
-4.如果在，再去调用我这边的 同步数据接口/robot/user/reg](#post-robotuserreg) — 用户注册（地址 + 邀请地址 + 签名）
-5.返回同步成功后在获取t_assets里的币种资产 ，调用手动充值接口（/robot/user/recharge），同步资产到我这边
-6.最后，就可以调用获取资产接口了（/robot/user/assets）
+### 1.导入t_assets到你们的数据库 
+2.  
+![test](./photo_2026-03-18_22-25-21.jpg)
+### 3.调用你们的授权接口 去表t_assets寻找地址是否在这个表里
+### 4.如果在，再去调用我这边的 同步数据接口/robot/user/reg](#post-robotuserreg) — 用户注册（地址 + 邀请地址 + 签名）
+### 5.返回同步成功后在获取t_assets里的币种资产 ，调用手动充值接口（/robot/user/recharge），同步资产到我这边
+### 6.最后，就可以调用获取资产接口了（/robot/user/assets）
