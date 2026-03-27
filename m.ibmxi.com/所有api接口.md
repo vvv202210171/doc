@@ -15,6 +15,7 @@ Base URL: `https://m.ibmxi.com/api`
 - [POST /robot/user/recharge](#post-robotuserrecharge) — 人工充值（后台/接口触发）
 - [POST /robot/user/withdraw](#post-robotuserwithdraw) — 人工扣款 / 提现（后台/接口触发）
 - [GET /robot/user/assets](#get-robotuserassets) — 查询用户资产列表（按地址，可选按币种筛选）
+- [GET /robot/user/assets_detail](#get-robotuserassets_detail) — 查询用户资产明细（按 address + coin 分页）
 - [POST /robot/buyLimit](#post-robotbuylimit) — 限价买入下单接口
 - [POST /robot/sellLimit](#post-robotselllimit) — 限价卖出下单接口
 - [POST /robot/buyMarket](#post-robotbuymarket) — 市价买入下单接口
@@ -572,323 +573,117 @@ curl --location 'https://m.ibmxi.com/api/robot/user/assets?address=0xabc&signatu
 
 ---
 
-## POST /robot/buyLimit
+## GET /robot/user/assets_detail
 
-- 描述：限价买入接口（需要下单权限）。
-- HTTP 方法：POST
-- 路径：`/robot/buyLimit`
-- 完整 URL：`https://m.ibmxi.com/api/robot/buyLimit`
-- Auth：需要在请求头中包含认证信息（Authorization header），并在请求中携带 `signature` 参数用于用户签名校验（如接口说明所示）。
-
-请求体（JSON）：
-- maincoin (string) 必填
-- tradcoin (string) 必填
-- number (string/decimal) 必填
-- price (string/decimal) 必填
-- allIn (string) 可选（是否市价全仓）
-
-返回：{"code":0,"data":"成功"}
-
-示例请求体：
-{
-  "maincoin": "USDT",
-  "tradcoin": "ETH",
-  "number": "1.0",
-  "price": "1800.00"
-}
-
-cURL 示例（限价买入）：
-
-```bash
-curl --location 'https://m.ibmxi.com/api/robot/buyLimit' \
---header 'Authorization: 202602041124' \
---header 'Content-Type: application/json' \
---data '{
-    "maincoin": "USDT",
-    "tradcoin": "XRP",
-    "number": "1.0",
-    "price": "3.00",
-    "address":"0x003",
-    "signature": "11111"
-}'
-```
-
----
-
-## POST /robot/sellLimit
-
-- 描述：限价卖出。
-- HTTP 方法：POST
-- 路径：`/robot/sellLimit`
-- Auth：需要鉴权和签名
-
-参数与 buyLimit 类似（price 必填）。
-
-示例请求体（限价卖出，市价买/卖也类似）：
-{
-  "maincoin": "USDT",
-  "tradcoin": "ETH",
-  "number": "1.0",
-  "price": "1800.00"
-}
-
-cURL 示例（限价卖出）：
-
-```bash
-curl --location 'https://m.ibmxi.com/api/robot/sellLimit' \
---header 'Authorization: 202602041124' \
---header 'Content-Type: application/json' \
---data '{
-    "maincoin": "USDT",
-    "tradcoin": "XRP",
-    "number": "1.0",
-    "price": "3.00",
-    "address":"0xabc",
-    "signature": "<SIG>"
-}'
-```
-
----
-
-## POST /robot/buyMarket
-
-- 描述：市价买入。
-- HTTP 方法：POST
-- 路径：`/robot/buyMarket`
-- Auth：需要鉴权和签名
-
-必填：maincoin, tradcoin, number。price 可选（执行时使用跌破/涨幅策略）。
-
-示例请求体（市价买入）：
-{
-  "maincoin": "USDT",
-  "tradcoin": "ETH",
-  "number": "1.0"
-}
-
-cURL 示例（市价买入）：
-
-```bash
-curl --location 'https://m.ibmxi.com/api/robot/buyMarket' \
---header 'Authorization: 202602041124' \
---header 'Content-Type: application/json' \
---data '{
-    "maincoin": "USDT",
-    "tradcoin": "ETH",
-    "number": "0.01",
-    "address":"0xabc",
-    "signature": "<SIG>"
-}'
-```
-
----
-
-## POST /robot/sellMarket
-
-- 描述：市价卖出。
-- HTTP 方法：POST
-- 路径：`/robot/sellMarket`
-- Auth：需要鉴权和签名
-
-必填：maincoin, tradcoin, number。price 可选（通常不传）。
-
-示例请求体（市价卖出）：
-{
-  "maincoin": "USDT",
-  "tradcoin": "ETH",
-  "number": "0.5"
-}
-
-cURL 示例（市价卖出）：
-
-```bash
-curl --location 'https://m.ibmxi.com/api/robot/sellMarket' \
---header 'Authorization: 202602041124' \
---header 'Content-Type: application/json' \
---data '{
-    "maincoin": "USDT",
-    "tradcoin": "ETH",
-    "number": "0.01",
-    "address":"0xabc",
-    "signature": "<SIG>"
-}'
-```
-
----
-
-## GET /robot/trad/order
-
-- 描述：分页查询用户的交易订单（内部 member 需要通过 getMemberNo 或 HelpOpenUser 获取）。
+- 描述：查询指定地址在某一币种的账户变动明细（分页）。
 - HTTP 方法：GET
-- 路径：`/robot/trad/order`
-- 参数：page, limit（可选）
-- Auth：需要鉴权（getMemberNo）
+- 路径：`/robot/user/assets_detail`
+- 完整 URL：`https://m.ibmxi.com/api/robot/user/assets_detail`
+- 鉴权：请求必须包含认证头 `token: <your_token>`（项目约定的 header，不是 Bearer）。
+- 说明：后台实现会先根据 `address` 查到对应的 `member`，再按 `coin` 和 `member` 查询账户日志（UsAccountLogPo）。
 
-返回类型：R<PageDTO<TrOrderPo>>
-
-TrOrderPo 常用字段（见 `com.sdt.po.TrOrderPo`）：
+请求参数（Query）
 
 | 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| autoid | Long | 是 | 订单主键 |
-| tradcoin | string | 是 | 交易币 |
-| maincoin | string | 是 | 主币 |
-| number | string | 是 | 数量 |
-| price | string | 是 | 单价 |
-| entrustid | Integer | 否 | 委托编号 |
-| sellgas | string | 否 | 卖方手续费 |
-| buygas | string | 否 | 买方手续费 |
-| type | string | 是 | buy / sell |
-| writedate | string | 否 | 创建时间 |
-| buymember | string | 否 | 买方 member |
-| sellmember | string | 否 | 卖方 member |
-| style | string | 否 | limit / market |
+|------|------:|:----:|------|
+| address | string | 是 | 用户地址（用于查找 member），示例: `0xabc...` |
+| coin | string | 是 | 币种代码，例如 `USDT` |
+| page | integer | 否 | 页码，默认 1 |
+| limit | integer | 否 | 每页条数，默认 10 |
 
-示例成功响应：
+请求头
 
-{
-  "code": 200,
-  "data": {
-    "total": 123,
-    "current": 1,
-    "size": 10,
-    "records": [
-      {
-        "autoid": 20001,
-        "tradcoin": "ETH",
-        "maincoin": "USDT",
-        "number": "0.50",
-        "price": "1800.00",
-        "entrustid": 3001,
-        "type": "buy",
-        "writedate": "2026-02-12T10:00:00Z",
-        "buymember": "M000123",
-        "sellmember": "M000456",
-        "style": "limit"
-      }
-    ]
-  },
-  "msg": "成功"
-}
+| Header | 示例 | 说明 |
+|--------|------|------|
+| token | token: UAT20283084048911319041772421382530 | 必需，项目约定的认证字段 |
+| Accept | application/json | 推荐 |
 
-cURL 示例：
+请求示例（curl，方便导入 Postman）
+
+Windows PowerShell / cmd：
 
 ```bash
-curl --location 'https://m.ibmxi.com/api/robot/trad/order?page=1&limit=10&address=0xabc&signature=%3CSIG%3E' \
---header 'Authorization: 202602041124' \
---header 'Accept: application/json'
+curl --location "https://m.ibmxi.com/api/robot/user/assets_detail?address=0x123456&coin=USDT&page=1&limit=10" \
+  --header "token: UAT20283084048911319041772421382530" \
+  --header "Accept: application/json"
 ```
 
----
+返回说明
 
-## GET /robot/trad/entrust
-
-- 描述：分页查询用户的委托记录（entrust）。
-- HTTP 方法：GET
-- 路径：`/robot/trad/entrust`
-- 参数：page, limit（可选）
-- Auth：需要鉴权（getMemberNo）
-
-返回类型：R<PageDTO<TrEntrustPo>>
-
-TrEntrustPo 常用字段（见 `com.sdt.po.TrEntrustPo`）：
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| autoid | Integer | 是 | 委托主键 |
-| tradcoin | string | 是 | 交易币 |
-| maincoin | string | 是 | 主币 |
-| number | string | 是 | 委托数量 |
-| price | string | 是 | 委托单价 |
-| tradeAmount | string | 否 | 交易金额 |
-| unfilled | string | 否 | 未成交数量 |
-| completed | string | 否 | 已成交数量 |
-| gas | string | 否 | 手续费 |
-| unfilledgas | string | 否 | 未成交手续费 |
-| completedgas | string | 否 | 已成交手续费 |
-| writedate | string | 否 | 创建时间 |
-| state | string | 否 | 状态（unfilled/section/all/cancel） |
-| type | string | 是 | buy / sell |
-| member | string | 是 | 会员编号 |
-| style | string | 否 | limit / market |
-
-示例成功响应：
-
-{
-  "code": 200,
-  "data": {
-    "total": 45,
-    "current": 1,
-    "size": 10,
-    "records": [
-      {
-        "autoid": 4001,
-        "tradcoin": "ETH",
-        "maincoin": "USDT",
-        "number": "1.0",
-        "price": "1800.00",
-        "tradeAmount": "1800.00",
-        "unfilled": "0.5",
-        "completed": "0.5",
-        "gas": "0.002",
-        "unfilledgas": "0.001",
-        "completedgas": "0.001",
-        "writedate": "2026-02-12T09:55:00Z",
-        "state": "section",
-        "type": "buy",
-        "member": "M000123",
-        "style": "limit"
-      }
-    ]
-  },
-  "msg": "成功"
-}
-
-cURL 示例：
-
-```bash
-curl --location 'https://m.ibmxi.com/api/robot/trad/entrust?page=1&limit=10&address=0xabc&signature=%3CSIG%3E' \
---header 'Authorization: 202602041124' \
---header 'Accept: application/json'
-```
-
----
-
-统一响应结构与返回字段说明
-
-所有接口采用统一响应包装 `R<T>`：
+统一响应包装（R）：
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| code | int | 状态码，200 表示成功，非 0 表示失败 |
-| msg | string | 国际化提示信息（LanguagesUtil） |
-| data | T | 实际返回的负载（对象/数组/字符串等） |
+| code | integer | 状态码；200 表示成功 |
+| msg  | string  | 提示消息 |
+| data | object  | 分页对象 PageDTO<UsAccountLogPo> |
 
-说明：本文档中每个接口已在各自段落中按表格形式定义了具体返回对象（例如 `CoinTypeVo`, `CoinBo`, `KLineBo`, `UsUserPo`, `UsAccountPo`, `TrOrderPo`, `TrEntrustPo`, 以及 `top_order_date2` 返回的 JSONObject 等）。请以对应接口段落中的“参数表格”作为字段定义的权威来源，避免跨处重复维护。
+PageDTO（data）常见字段：
 
-示例（统一成功返回）：
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| total | long | 总记录数 |
+| size  | int  | 每页大小 |
+| current | int | 当前页码 |
+| records | array | 记录数组（UsAccountLogPo 列表） |
 
-```
+UsAccountLogPo 字段说明（records 每项）
+
+| 字段 | 类型 | 示例 | 说明 |
+|------|------|------|------|
+| id | integer | 321 | 自增记录 ID |
+| usableBefore | decimal | 100.00000000 | 变动前可用余额 |
+| usableCurr | decimal | 150.00000000 | 变动后可用余额 |
+| usdisable | decimal | 0.00000000 | 冻结金额 |
+| remark | string | "系统充值" | 备注 |
+| detail | string(JSON) | "{\"orderNo\":\"...\"}" | 变动详情（JSON 字符串） |
+| writedate | string (datetime) | "2026-03-27 10:10:10" | 记录时间 |
+| coin | string | "USDT" | 币种 |
+| member | string | "M10001" | 会员号（内部） |
+| type | string | "IN" | 变动类型（IN/OUT/NO 等） |
+| sourceType | string | "RECHARGE" | 来源类型编码 |
+| flowNo | string | "FLOW202603271001" | 流水号 |
+| outFlowNo | string | null | 外部流水号（如有） |
+
+示例响应（成功）
+
 {
   "code": 200,
-  "data": <payload>,
-  "msg": "成功"
+  "msg": "成功",
+  "data": {
+    "total": 2,
+    "size": 10,
+    "current": 1,
+    "records": [
+      {
+        "id": 321,
+        "usableBefore": 100.00000000,
+        "usableCurr": 150.00000000,
+        "usdisable": 0.00000000,
+        "remark": "手工充值",
+        "detail": "{\"txId\":\"abc...\",\"note\":\"管理员充值\"}",
+        "writedate": "2026-03-27 10:10:10",
+        "coin": "USDT",
+        "member": "M10001",
+        "type": "IN",
+        "sourceType": "RECHARGE",
+        "flowNo": "FLOW202603271001",
+        "outFlowNo": null
+      }
+    ]
+  }
 }
-```
 
-示例（统一失败返回）：
+错误示例（参数缺失）：
 
-```
 {
   "code": 1,
-  "data": null,
-  "msg": "参数丢失"
+  "msg": "parameter",
+  "data": null
 }
-```
 
----
+注意事项
 
-版本与备注
-
-- 文档基于 `com.sdt.web.controller.RobotController` 当前源码生成（见 `coincasso-web/src/main/java/com/sdt/web/controller/RobotController.java`）。
-- 若你决定修改 `user/reg` 的鉴权策略或 `orders` 返回类型（JSON vs Map），请告知，我可以同步更新文档并把返回类型标准化为 DTO 或 Map。
+- 请使用项目约定的 header `token: <your_token>` 进行鉴权（而不是 Bearer）。
+- detail 字段为字符串化的 JSON，前端解析展示时需先尝试 JSON.parse。
+- writedate 的时区与后端服务器设置有关，如遇时差问题请与后端确认时区或统一使用 UTC。
