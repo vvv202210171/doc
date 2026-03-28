@@ -579,7 +579,7 @@ curl --location 'https://m.ibmxi.com/api/robot/user/assets?address=0xabc&signatu
 - HTTP 方法：GET
 - 路径：`/robot/user/assets_detail`
 - 完整 URL：`https://m.ibmxi.com/api/robot/user/assets_detail`
-- 鉴权：请求必须包含认证头 `token: <your_token>`（项目约定的 header，不是 Bearer）。
+- 鉴权：请求必须包含认证头 `authorization: <your_token>`（项目约定的 header，不是 Bearer）。
 - 说明：后台实现会先根据 `address` 查到对应的 `member`，再按 `coin` 和 `member` 查询账户日志（UsAccountLogPo）。
 
 请求参数（Query）
@@ -595,7 +595,7 @@ curl --location 'https://m.ibmxi.com/api/robot/user/assets?address=0xabc&signatu
 
 | Header | 示例 | 说明 |
 |--------|------|------|
-| token | token: UAT20283084048911319041772421382530 | 必需，项目约定的认证字段 |
+| authorization | 202602041124 | 必需，项目约定的认证字段 |
 | Accept | application/json | 推荐 |
 
 请求示例（curl，方便导入 Postman）
@@ -604,7 +604,7 @@ Windows PowerShell / cmd：
 
 ```bash
 curl --location "https://m.ibmxi.com/api/robot/user/assets_detail?address=0x123456&coin=USDT&page=1&limit=10" \
-  --header "token: UAT20283084048911319041772421382530" \
+  --header "authorization: 202602041124" \
   --header "Accept: application/json"
 ```
 
