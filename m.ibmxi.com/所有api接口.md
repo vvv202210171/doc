@@ -992,19 +992,21 @@ curl --location 'https://m.ibmxi.com/api/robot/trad/order?address=0xabc&maincoin
 
 订单记录（TradOrderPo）字段说明：
 
-| 字段 | 类型 | 示例 | 说明 |
-|------|------|------|------|
-| id | integer | 101 | 交易订单 ID |
-| address | string | 0xabc... | 交易用户地址 |
-| tradcoin | string | BTC | 交易币 |
-| maincoin | string | USDT | 主币 |
-| direction | string | buy | 交易方向：buy（买）、sell（卖） |
-| number | decimal | 0.5 | 交易数量 |
-| price | decimal | 45000.00 | 成交价格 |
-| totalAmount | decimal | 22500.00 | 成交总额 |
-| status | string | FILLED | 订单状态：PENDING、PARTIAL、FILLED、CANCELLED |
-| createTime | datetime | 2026-03-30 10:30:00 | 订单创建时间 |
-| finishTime | datetime | 2026-03-30 10:35:00 | 订单完成时间 |
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| autoid | long | 主键ID（自增） |
+| tradcoin | string | 交易币种 |
+| maincoin | string | 主币种 |
+| number | decimal | 成交数量 |
+| price | decimal | 成交单价 |
+| entrustid | integer | 关联委托单ID/订单编号 |
+| sellgas | decimal | 卖方交易手续费 |
+| type | string | 成交类型：`buy`（买）/`sell`（卖） |
+| writedate | datetime | 创建时间 |
+| buymember | string | 买方会员编号 |
+| sellmember | string | 卖方会员编号 |
+| style | string | 下单方式：`limit`（限价）/`market`（市价） |
+| buygas | decimal | 买方交易手续费 |
 
 示例成功响应：
 
