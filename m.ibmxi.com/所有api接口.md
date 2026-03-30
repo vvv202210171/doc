@@ -958,10 +958,6 @@ curl --location 'https://m.ibmxi.com/api/robot/sellMarket' \
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| address | string | 是 | 用户地址 |
-| maincoin | string | 否 | 主币过滤，例如 `USDT` |
-| tradcoin | string | 否 | 交易币过滤，例如 `BTC` |
-| direction | string | 否 | 交易方向：`buy`（买）或 `sell`（卖） |
 | page | integer | 否 | 页码，默认 1 |
 | limit | integer | 否 | 每页条数，默认 10 |
 
