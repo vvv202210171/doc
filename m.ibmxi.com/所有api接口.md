@@ -579,7 +579,7 @@ curl --location 'https://m.ibmxi.com/api/robot/user/assets?address=0xabc&signatu
 - HTTP 方法：GET
 - 路径：`/robot/user/assets_detail`
 - 完整 URL：`https://m.ibmxi.com/api/robot/user/assets_detail`
-- 鉴权：请求必须包含认证头 `authorization: <your_token>`（项目约定的 header，不是 Bearer）。
+- 鉴权：请求必须包含认证头 `token: <your_token>`（项目约定的 header，不是 Bearer）。
 - 说明：后台实现会先根据 `address` 查到对应的 `member`，再按 `coin` 和 `member` 查询账户日志（UsAccountLogPo）。
 
 请求参数（Query）
@@ -595,7 +595,7 @@ curl --location 'https://m.ibmxi.com/api/robot/user/assets?address=0xabc&signatu
 
 | Header | 示例 | 说明 |
 |--------|------|------|
-| authorization | 202602041124 | 必需，项目约定的认证字段 |
+| token | token: UAT20283084048911319041772421382530 | 必需，项目约定的认证字段 |
 | Accept | application/json | 推荐 |
 
 请求示例（curl，方便导入 Postman）
@@ -604,7 +604,7 @@ Windows PowerShell / cmd：
 
 ```bash
 curl --location "https://m.ibmxi.com/api/robot/user/assets_detail?address=0x123456&coin=USDT&page=1&limit=10" \
-  --header "authorization: 202602041124" \
+  --header "token: UAT20283084048911319041772421382530" \
   --header "Accept: application/json"
 ```
 
@@ -687,3 +687,505 @@ UsAccountLogPo 字段说明（records 每项）
 - 请使用项目约定的 header `token: <your_token>` 进行鉴权（而不是 Bearer）。
 - detail 字段为字符串化的 JSON，前端解析展示时需先尝试 JSON.parse。
 - writedate 的时区与后端服务器设置有关，如遇时差问题请与后端确认时区或统一使用 UTC。
+
+---
+
+## POST /robot/buyLimit
+
+- 描述：限价买入下单接口。用户以指定的价格买入指定数量的交易币。
+- HTTP 方法：POST
+- 路径：`/robot/buyLimit`
+- 完整 URL：`https://m.ibmxi.com/api/robot/buyLimit`
+- Auth：需要在请求头中包含认证信息（Authorization header）
+
+请求体（JSON）：
+- address (string) 必填 — 用户地址
+- maincoin (string) 必填 — 主币（支付币种），例如 `USDT`
+- tradcoin (string) 必填 — 交易币（购买币种），例如 `BTC`
+- number (string/decimal) 必填 — 购买数量
+- price (string/decimal) 必填 — 购买单价
+- signature (string) 必填 — 签名校验字段
+
+示例请求体：
+```json
+{
+  "address": "0xabc...",
+  "maincoin": "USDT",
+  "tradcoin": "BTC",
+  "number": "0.5",
+  "price": "45000.00",
+  "signature": "<SIG>"
+}
+```
+
+cURL 示例：
+
+```bash
+curl --location 'https://m.ibmxi.com/api/robot/buyLimit' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{"address":"0xabc","maincoin":"USDT","tradcoin":"BTC","number":"0.5","price":"45000.00","signature":"<SIG>"}'
+```
+
+返回类型：R<Object>
+
+示例成功响应：
+
+```json
+{
+  "code": 200,
+  "data": {
+    "orderId": "12345678",
+    "tradcoin": "BTC",
+    "maincoin": "USDT",
+    "number": "0.5",
+    "price": "45000.00",
+    "totalAmount": "22500.00",
+    "status": "PENDING",
+    "createTime": "2026-03-30T10:30:00Z"
+  },
+  "msg": "成功"
+}
+```
+
+常见错误：
+- 参数缺失：返回 `parameter`
+- 余额不足：返回 `insufficientBalance`
+- 币种不存在：返回 `noCoin`
+
+---
+
+## POST /robot/sellLimit
+
+- 描述：限价卖出下单接口。用户以指定的价格卖出指定数量的交易币。
+- HTTP 方法：POST
+- 路径：`/robot/sellLimit`
+- 完整 URL：`https://m.ibmxi.com/api/robot/sellLimit`
+- Auth：需要在请求头中包含认证信息（Authorization header）
+
+请求体（JSON）：
+- address (string) 必填 — 用户地址
+- maincoin (string) 必填 — 主币（结算币种），例如 `USDT`
+- tradcoin (string) 必填 — 交易币（卖出币种），例如 `BTC`
+- number (string/decimal) 必填 — 卖出数量
+- price (string/decimal) 必填 — 卖出单价
+- signature (string) 必填 — 签名校验字段
+
+示例请求体：
+```json
+{
+  "address": "0xabc...",
+  "maincoin": "USDT",
+  "tradcoin": "BTC",
+  "number": "0.5",
+  "price": "44800.00",
+  "signature": "<SIG>"
+}
+```
+
+cURL 示例：
+
+```bash
+curl --location 'https://m.ibmxi.com/api/robot/sellLimit' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{"address":"0xabc","maincoin":"USDT","tradcoin":"BTC","number":"0.5","price":"44800.00","signature":"<SIG>"}'
+```
+
+返回类型：R<Object>
+
+示例成功响应：
+
+```json
+{
+  "code": 200,
+  "data": {
+    "orderId": "12345679",
+    "tradcoin": "BTC",
+    "maincoin": "USDT",
+    "number": "0.5",
+    "price": "44800.00",
+    "totalAmount": "22400.00",
+    "status": "PENDING",
+    "createTime": "2026-03-30T10:31:00Z"
+  },
+  "msg": "成功"
+}
+```
+
+常见错误：
+- 参数缺失：返回 `parameter`
+- 余额不足：返回 `insufficientBalance`
+- 币种不存在：返回 `noCoin`
+
+---
+
+## POST /robot/buyMarket
+
+- 描述：市价买入下单接口。用户以当前市价购买指定金额或数量的交易币。
+- HTTP 方法：POST
+- 路径：`/robot/buyMarket`
+- 完整 URL：`https://m.ibmxi.com/api/robot/buyMarket`
+- Auth：需要在请求头中包含认证信息（Authorization header）
+
+请求体（JSON）：
+- address (string) 必填 — 用户地址
+- maincoin (string) 必填 — 主币（支付币种），例如 `USDT`
+- tradcoin (string) 必填 — 交易币（购买币种），例如 `BTC`
+- number (string/decimal) 必填 — 购买数量
+- signature (string) 必填 — 签名校验字段
+
+示例请求体：
+```json
+{
+  "address": "0xabc...",
+  "maincoin": "USDT",
+  "tradcoin": "BTC",
+  "number": "0.5",
+  "signature": "<SIG>"
+}
+```
+
+cURL 示例：
+
+```bash
+curl --location 'https://m.ibmxi.com/api/robot/buyMarket' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{"address":"0xabc","maincoin":"USDT","tradcoin":"BTC","number":"0.5","signature":"<SIG>"}'
+```
+
+返回类型：R<Object>
+
+示例成功响应：
+
+```json
+{
+  "code": 200,
+  "data": {
+    "orderId": "12345680",
+    "tradcoin": "BTC",
+    "maincoin": "USDT",
+    "number": "0.5",
+    "avgPrice": "45050.00",
+    "totalAmount": "22525.00",
+    "status": "FILLED",
+    "createTime": "2026-03-30T10:32:00Z"
+  },
+  "msg": "成功"
+}
+```
+
+常见错误：
+- 参数缺失：返回 `parameter`
+- 余额不足：返回 `insufficientBalance`
+- 币种不存在：返回 `noCoin`
+
+---
+
+## POST /robot/sellMarket
+
+- 描述：市价卖出下单接口。用户以当前市价卖出指定数量的交易币。
+- HTTP 方法：POST
+- 路径：`/robot/sellMarket`
+- 完整 URL：`https://m.ibmxi.com/api/robot/sellMarket`
+- Auth：需要在请求头中包含认证信息（Authorization header）
+
+请求体（JSON）：
+- address (string) 必填 — 用户地址
+- maincoin (string) 必填 — 主币（结算币种），例如 `USDT`
+- tradcoin (string) 必填 — 交易币（卖出币种），例如 `BTC`
+- number (string/decimal) 必填 — 卖出数量
+- signature (string) 必填 — 签名校验字段
+
+示例请求体：
+```json
+{
+  "address": "0xabc...",
+  "maincoin": "USDT",
+  "tradcoin": "BTC",
+  "number": "0.5",
+  "signature": "<SIG>"
+}
+```
+
+cURL 示例：
+
+```bash
+curl --location 'https://m.ibmxi.com/api/robot/sellMarket' \
+--header 'Authorization: 202602041124' \
+--header 'Content-Type: application/json' \
+--data '{"address":"0xabc","maincoin":"USDT","tradcoin":"BTC","number":"0.5","signature":"<SIG>"}'
+```
+
+返回类型：R<Object>
+
+示例成功响应：
+
+```json
+{
+  "code": 200,
+  "data": {
+    "orderId": "12345681",
+    "tradcoin": "BTC",
+    "maincoin": "USDT",
+    "number": "0.5",
+    "avgPrice": "44950.00",
+    "totalAmount": "22475.00",
+    "status": "FILLED",
+    "createTime": "2026-03-30T10:33:00Z"
+  },
+  "msg": "成功"
+}
+```
+
+常见错误：
+- 参数缺失：返回 `parameter`
+- 余额不足：返回 `insufficientBalance`
+- 币种不存在：返回 `noCoin`
+
+---
+
+## GET /robot/trad/order
+
+- 描述：分页查询用户的历史交易订单（已成交）。
+- HTTP 方法：GET
+- 路径：`/robot/trad/order`
+- 完整 URL：`https://m.ibmxi.com/api/robot/trad/order`
+- Auth：需要在请求头中包含认证信息（Authorization header）
+
+请求参数（Query）
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| address | string | 是 | 用户地址 |
+| maincoin | string | 否 | 主币过滤，例如 `USDT` |
+| tradcoin | string | 否 | 交易币过滤，例如 `BTC` |
+| direction | string | 否 | 交易方向：`buy`（买）或 `sell`（卖） |
+| page | integer | 否 | 页码，默认 1 |
+| limit | integer | 否 | 每页条数，默认 10 |
+
+示例请求：
+
+GET https://m.ibmxi.com/api/robot/trad/order?address=0xabc&maincoin=USDT&tradcoin=BTC&page=1&limit=10
+
+cURL 示例：
+
+```bash
+curl --location 'https://m.ibmxi.com/api/robot/trad/order?address=0xabc&maincoin=USDT&tradcoin=BTC&page=1&limit=10' \
+--header 'Authorization: 202602041124' \
+--header 'Accept: application/json'
+```
+
+返回类型：R<PageDTO<TradOrderPo>>
+
+返回字段说明
+
+分页对象（PageDTO）包含以下字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| total | long | 总记录数 |
+| size  | int  | 每页大小 |
+| current | int | 当前页码 |
+| records | array | 订单记录数组 |
+
+订单记录（TradOrderPo）字段说明：
+
+| 字段 | 类型 | 示例 | 说明 |
+|------|------|------|------|
+| id | integer | 101 | 交易订单 ID |
+| address | string | 0xabc... | 交易用户地址 |
+| tradcoin | string | BTC | 交易币 |
+| maincoin | string | USDT | 主币 |
+| direction | string | buy | 交易方向：buy（买）、sell（卖） |
+| number | decimal | 0.5 | 交易数量 |
+| price | decimal | 45000.00 | 成交价格 |
+| totalAmount | decimal | 22500.00 | 成交总额 |
+| status | string | FILLED | 订单状态：PENDING、PARTIAL、FILLED、CANCELLED |
+| createTime | datetime | 2026-03-30 10:30:00 | 订单创建时间 |
+| finishTime | datetime | 2026-03-30 10:35:00 | 订单完成时间 |
+
+示例成功响应：
+
+```json
+{
+  "code": 200,
+  "msg": "成功",
+  "data": {
+    "total": 5,
+    "size": 10,
+    "current": 1,
+    "records": [
+      {
+        "id": 101,
+        "address": "0xabc...",
+        "tradcoin": "BTC",
+        "maincoin": "USDT",
+        "direction": "buy",
+        "number": "0.5",
+        "price": "45000.00",
+        "totalAmount": "22500.00",
+        "status": "FILLED",
+        "createTime": "2026-03-30 10:30:00",
+        "finishTime": "2026-03-30 10:35:00"
+      },
+      {
+        "id": 102,
+        "address": "0xabc...",
+        "tradcoin": "ETH",
+        "maincoin": "USDT",
+        "direction": "sell",
+        "number": "1.0",
+        "price": "1800.00",
+        "totalAmount": "1800.00",
+        "status": "FILLED",
+        "createTime": "2026-03-30 11:00:00",
+        "finishTime": "2026-03-30 11:05:00"
+      }
+    ]
+  }
+}
+```
+
+错误示例：
+
+```json
+{
+  "code": 1,
+  "msg": "parameter",
+  "data": null
+}
+```
+
+---
+
+## GET /robot/trad/entrust
+
+- 描述：分页查询用户的委托记录（包含待成交、部分成交、已取消等状态）。
+- HTTP 方法：GET
+- 路径：`/robot/trad/entrust`
+- 完整 URL：`https://m.ibmxi.com/api/robot/trad/entrust`
+- Auth：需要在请求头中包含认证信息（Authorization header）
+
+请求参数（Query）
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| address | string | 是 | 用户地址 |
+| maincoin | string | 否 | 主币过滤，例如 `USDT` |
+| tradcoin | string | 否 | 交易币过滤，例如 `BTC` |
+| direction | string | 否 | 委托方向：`buy`（买）或 `sell`（卖） |
+| status | string | 否 | 委托状态：`PENDING`、`PARTIAL`、`FILLED`、`CANCELLED`、`EXPIRED` |
+| page | integer | 否 | 页码，默认 1 |
+| limit | integer | 否 | 每页条数，默认 10 |
+
+示例请求：
+
+GET https://m.ibmxi.com/api/robot/trad/entrust?address=0xabc&status=PENDING&page=1&limit=10
+
+cURL 示例：
+
+```bash
+curl --location 'https://m.ibmxi.com/api/robot/trad/entrust?address=0xabc&status=PENDING&page=1&limit=10' \
+--header 'Authorization: 202602041124' \
+--header 'Accept: application/json'
+```
+
+返回类型：R<PageDTO<EntrustPo>>
+
+返回字段说明
+
+分页对象（PageDTO）包含以下字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| total | long | 总记录数 |
+| size  | int  | 每页大小 |
+| current | int | 当前页码 |
+| records | array | 委托记录数组 |
+
+委托记录（EntrustPo）字段说明：
+
+| 字段 | 类型 | 示例 | 说明 |
+|------|------|------|------|
+| id | integer | 201 | 委托记录 ID |
+| entrustNo | string | ENT20260330001 | 委托单号 |
+| address | string | 0xabc... | 委托用户地址 |
+| tradcoin | string | BTC | 交易币 |
+| maincoin | string | USDT | 主币 |
+| direction | string | buy | 委托方向：buy（买）、sell（卖） |
+| number | decimal | 1.0 | 委托数量 |
+| price | decimal | 44800.00 | 委托单价 |
+| totalAmount | decimal | 44800.00 | 委托总金额 |
+| dealNumber | decimal | 0.5 | 已成交数量 |
+| status | string | PENDING | 委托状态 |
+| createTime | datetime | 2026-03-30 10:45:00 | 委托创建时间 |
+| updateTime | datetime | 2026-03-30 10:50:00 | 委托更新时间 |
+
+示例成功响应：
+
+```json
+{
+  "code": 200,
+  "msg": "成功",
+  "data": {
+    "total": 3,
+    "size": 10,
+    "current": 1,
+    "records": [
+      {
+        "id": 201,
+        "entrustNo": "ENT20260330001",
+        "address": "0xabc...",
+        "tradcoin": "BTC",
+        "maincoin": "USDT",
+        "direction": "buy",
+        "number": "1.0",
+        "price": "44800.00",
+        "totalAmount": "44800.00",
+        "dealNumber": "0.5",
+        "status": "PENDING",
+        "createTime": "2026-03-30 10:45:00",
+        "updateTime": "2026-03-30 10:50:00"
+      },
+      {
+        "id": 202,
+        "entrustNo": "ENT20260330002",
+        "address": "0xabc...",
+        "tradcoin": "ETH",
+        "maincoin": "USDT",
+        "direction": "sell",
+        "number": "2.0",
+        "price": "1805.00",
+        "totalAmount": "3610.00",
+        "dealNumber": "1.0",
+        "status": "PARTIAL",
+        "createTime": "2026-03-30 11:10:00",
+        "updateTime": "2026-03-30 11:20:00"
+      }
+    ]
+  }
+}
+```
+
+错误示例：
+
+```json
+{
+  "code": 1,
+  "msg": "parameter",
+  "data": null
+}
+```
+
+注意事项
+
+- 委托状态说明：
+  - `PENDING`：待成交，未有成交量
+  - `PARTIAL`：部分成交，已成交部分数量
+  - `FILLED`：已成交，全部成交
+  - `CANCELLED`：已取消，用户手动取消
+  - `EXPIRED`：已过期，委托超时自动取消
+- 查询结果按创建时间倒序排列
+- 时间字段格式为 `yyyy-MM-dd HH:mm:ss`
