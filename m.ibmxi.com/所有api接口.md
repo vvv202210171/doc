@@ -20,8 +20,8 @@ Base URL: `https://m.ibmxi.com/api`
 - [POST /robot/sellLimit](#post-robotselllimit) — 限价卖出下单接口
 - [POST /robot/buyMarket](#post-robotbuymarket) — 市价买入下单接口
 - [POST /robot/sellMarket](#post-robotsellmarket) — 市价卖出下单接口
-- [GET /robot/trad/order](#get-robottradsorder) — 分页查询用户交易订单（历史）
-- [GET /robot/trad/entrust](#get-robottradseentrust) — 分页查询用户委托记录
+- [GET /robot/trad/order](#get-robottradorder) — 分页查询用户交易订单（历史）
+- [GET /robot/trad/entrust](#get-robottradentrust) — 分页查询用户委托记录
 
 ---
 
@@ -1060,17 +1060,17 @@ curl --location 'https://m.ibmxi.com/api/robot/trad/order?address=0xabc&maincoin
 
 ## GET /robot/trad/entrust
 
-- 描述：分页查询用户的委托记录（包含待成交、部分成交、已取消等状态）。
+- 描述：分页查询市场/撮合系统（非 C2C）中的交易委托记录（包含待成交、部分成交、已取消等状态）。该接口由后端服务 `tradServices` 提供（例如 `pageTradEntrust(memberNo, pageDTO)`），针对现货撮合或机器人模拟订单查询，与 C2C 业务无关。
 - HTTP 方法：GET
 - 路径：`/robot/trad/entrust`
 - 完整 URL：`https://m.ibmxi.com/api/robot/trad/entrust`
-- Auth：需要在请求头中包含认证信息（Authorization header）
+- 鉴权：需要在请求头中包含项目约定的认证字段 `token: <your_token>`（并非 Bearer）。
 
 请求参数（Query）
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| address | string | 是 | 用户地址 |
+| address | string | 是 | 用户地址（用于识别会员） |
 | maincoin | string | 否 | 主币过滤，例如 `USDT` |
 | tradcoin | string | 否 | 交易币过滤，例如 `BTC` |
 | direction | string | 否 | 委托方向：`buy`（买）或 `sell`（卖） |
@@ -1082,108 +1082,181 @@ curl --location 'https://m.ibmxi.com/api/robot/trad/order?address=0xabc&maincoin
 
 GET https://m.ibmxi.com/api/robot/trad/entrust?address=0xabc&status=PENDING&page=1&limit=10
 
-cURL 示例：
+cURL 示例 (方便导入 Postman)：
 
 ```bash
 curl --location 'https://m.ibmxi.com/api/robot/trad/entrust?address=0xabc&status=PENDING&page=1&limit=10' \
---header 'Authorization: 202602041124' \
+--header 'token: UAT20283084048911319041772421382530' \
 --header 'Accept: application/json'
 ```
 
 返回类型：R<PageDTO<EntrustPo>>
 
-返回字段说明
+### 委托记录（EntrustPo）字段说明
 
-分页对象（PageDTO）包含以下字段：
+下面表格给出接口对外返回的委托记录字段（基于项目实体 EntrustPo 的映射与规范化），便于前端与第三方统一使用：
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| total | long | 总记录数 |
-| size  | int  | 每页大小 |
-| current | int | 当前页码 |
-| records | array | 委托记录数组 |
+| 参数 | 类型 | 必填 | 说明 | 示例 |
+|------|------|------|------|------|
+| id | integer | 是 | 数据库自增主键（autoid），内部唯一标识 | 201 |
+| entrustNo | string | 是 | 对外展示的委托单号（可读单号，由服务端生成） | C2C20260330001 |
+| entrustId | integer | 否 | 历史/内部整型编号（如有） | 1001 |
+| member | string | 是 | 发单会员标识（会员号或账户ID） | M2026033001 |
+| address | string | 否 | 用户地址（如链地址），如系统有则返回 | 0xabc... |
+| virtualCoin | string | 是 | 虚拟币（原 maincoin），例如：USDT、BTC | USDT |
+| faitCoin | string | 是 | 法币/计价币（原 tradcoin），例如：CNY、USD | CNY |
+| direction | string | 是 | 委托方向：BUY（买）/SELL（卖） | BUY |
+| orderType | string | 是 | 委托方式：LIMIT（限价）/MARKET（市价） | LIMIT |
+| amount | decimal | 是 | 委托数量（下单数量） | 1.00000000 |
+| price | decimal | 条件 | 单价（限价单必填；市价单可为空或由成交填充） | 44800.00 |
+| totalAmount | decimal | 是 | 委托总金额 = price * amount（或市价成交额） | 44800.00 |
+| filled | decimal | 是 | 已成交数量（已成交） | 0.50000000 |
+| unfilled | decimal | 是 | 未成交数量（remaining） | 0.50000000 |
+| fee | decimal | 否 | 总手续费（可为买/卖合计或按侧定义） | 0.0001 |
+| completedFee | decimal | 否 | 已成交的手续费 | 0.00005 |
+| unfilledFee | decimal | 否 | 未成交的手续费 | 0.00005 |
+| status | string | 是 | 委托状态：PENDING/PARTIAL/FILLED/CANCELLED/EXPIRED（详见枚举） | PENDING |
+| createTime | datetime | 是 | 委托创建时间，建议返回 ISO 8601 或 yyyy-MM-dd HH:mm:ss（注意时区） | 2026-03-30 10:45:00 |
+| updateTime | datetime | 否 | 最近更新时间 | 2026-03-30 10:50:00 |
+| counterMerchantCode | string | 否 | 对方商户编码（当有对手方为商户时返回） | MCH20260330 |
+| counterMerchantName | string | 否 | 对方商户名称 | 商户A |
+| counterMerchantAvatar | string | 否 | 对方商户头像 URL | https://.../avatar.png |
+| paymentMethods | string[] | 否 | 支持的支付/到款方式数组（例如：["ALIPAY","WX","BANK"]） | ["ALIPAY","WX"] |
+| remark | string | 否 | 备注（委托详情中的说明） | 用户备注 |
 
-委托记录（EntrustPo）字段说明：
 
-| 字段 | 类型 | 示例 | 说明 |
-|------|------|------|------|
-| id | integer | 201 | 委托记录 ID |
-| entrustNo | string | ENT20260330001 | 委托单号 |
-| address | string | 0xabc... | 委托用户地址 |
-| tradcoin | string | BTC | 交易币 |
-| maincoin | string | USDT | 主币 |
-| direction | string | buy | 委托方向：buy（买）、sell（卖） |
-| number | decimal | 1.0 | 委托数量 |
-| price | decimal | 44800.00 | 委托单价 |
-| totalAmount | decimal | 44800.00 | 委托总金额 |
-| dealNumber | decimal | 0.5 | 已成交数量 |
-| status | string | PENDING | 委托状态 |
-| createTime | datetime | 2026-03-30 10:45:00 | 委托创建时间 |
-| updateTime | datetime | 2026-03-30 10:50:00 | 委托更新时间 |
+枚举说明（建议统一大小写并在后端统一映射）：
 
-示例成功响应：
+- direction:
+  - BUY — 买
+  - SELL — 卖
 
-```json
+- orderType:
+  - LIMIT — 限价单
+  - MARKET — 市价单
+
+- status:
+  - PENDING — 待成交 / 进行中
+  - PARTIAL — 部分成交
+  - FILLED / COMPLETED — 已全部成交
+  - CANCELLED — 已撤销
+  - EXPIRED — 已过期
+
+
+示例响应（单条委托记录）
+
+```
 {
-  "code": 200,
-  "msg": "成功",
-  "data": {
-    "total": 3,
-    "size": 10,
-    "current": 1,
-    "records": [
-      {
+    "code": 200,
+    "msg": "success",
+    "data": {
         "id": 201,
-        "entrustNo": "ENT20260330001",
+        "entrustNo": "C2C20260330001",
+        "entrustId": 1001,
+        "member": "M2026033001",
         "address": "0xabc...",
-        "tradcoin": "BTC",
-        "maincoin": "USDT",
-        "direction": "buy",
-        "number": "1.0",
+        "virtualCoin": "USDT",
+        "faitCoin": "CNY",
+        "direction": "BUY",
+        "orderType": "LIMIT",
+        "amount": "1.00000000",
         "price": "44800.00",
         "totalAmount": "44800.00",
-        "dealNumber": "0.5",
+        "filled": "0.50000000",
+        "unfilled": "0.50000000",
+        "fee": "0.0001",
+        "completedFee": "0.00005",
+        "unfilledFee": "0.00005",
         "status": "PENDING",
-        "createTime": "2026-03-30 10:45:00",
-        "updateTime": "2026-03-30 10:50:00"
-      },
-      {
-        "id": 202,
-        "entrustNo": "ENT20260330002",
-        "address": "0xabc...",
-        "tradcoin": "ETH",
-        "maincoin": "USDT",
-        "direction": "sell",
-        "number": "2.0",
-        "price": "1805.00",
-        "totalAmount": "3610.00",
-        "dealNumber": "1.0",
-        "status": "PARTIAL",
-        "createTime": "2026-03-30 11:10:00",
-        "updateTime": "2026-03-30 11:20:00"
-      }
-    ]
+        "createTime": "2026-03-30T10:45:00Z",
+        "updateTime": "2026-03-30T10:50:00Z",
+        "counterMerchantCode": "MCH20260330",
+        "counterMerchantName": "商户A",
+        "paymentMethods": ["ALIPAY","WX"],
+        "remark": "用户留言或商户备注"
+    }
+}
+```
+
+说明与建议：
+1. 建议后端 Controller 返回 DTO（例如 C2cEntrustDto），并把实体字段映射为对外需要的字段名，避免前端因命名不一致而出错。
+2. 时间格式建议统一并声明时区（推荐使用 UTC ISO 8601 或在文档中明确返回时间为 GMT+0/UTC）。
+3. 若业务需要唯一对外单号，请把 entrustNo 写入表或在创建时生成并持久化，而不是只使用 autoid/entrustid。
+4. 若委托涉及商户/对手方信息，建议在 DTO 中附带对方简要信息（名称、头像、联系方式摘要），以减少前端二次查询。
+
+### 委托记录（EntrustPo / TrEntrustPo 实体）字段说明（基于 `com.sdt.po.TrEntrustPo`）
+
+下面表格基于项目实体 `TrEntrustPo`（源码字段）给出：1）数据库/实体字段名；2）类型、是否必填、说明与示例。
+
+| 实体/DB 字段 | 类型 | 必填 | 说明 | 示例 |
+|--------------|------|------:|------|------|
+| autoid | integer | 是 | 数据库自增主键（实体 `autoid`） | 201 |
+| tradcoin | string | 是 | 法币/计价币（实体名：tradcoin）。表示计价币种，如 CNY、USD。 | CNY |
+| maincoin | string | 是 | 虚拟币/基币（实体名：maincoin）。表示交易的虚拟币，如 USDT、BTC。 | USDT |
+| `number` (DB 列名被转义) | decimal | 是 | 委托数量（实体字段为 `number`）。 | "1.00000000" |
+| price | decimal | 条件（限价必填） | 委托单价；限价单必须填，市价单可为空或由撮合后填充成交价 | "44800.00" |
+| trade_amount | decimal | 是 | 交易金额/委托总额（实体字段名：tradeAmount 对应 DB 列 `trade_amount`）。 | "44800.00" |
+| unfilled | decimal | 是 | 未成交数量（remaining quantity） | "0.50000000" |
+| completed | decimal | 是 | 已成交数量（completed/filled） | "0.50000000" |
+| gas | decimal | 否 | 手续费（可按侧或合并返回） | "0.0001" |
+| unfilledgas | decimal | 否 | 未成交手续费 | "0.00005" |
+| completedgas | decimal | 否 | 已成交手续费 | "0.00005" |
+| writedate | datetime | 是 | 创建时间（实体字段：writedate）。注意时区，建议用 ISO 8601 / UTC 或明确时区偏移。 | "2026-03-30T10:45:00Z" |
+| state | string | 是 | 委托状态（实体 `state`）。建议统一枚举（见下）。 | PENDING |
+| `type` (字段名被转义为 `type`) | string | 是 | 委托方向（实体 `type`）：BUY/SELL。 | BUY |
+| member | string | 是 | 发单会员号 / 账户标识 | M2026033001 |
+| style | string | 是 | 委托方式（实体 `style`）：LIMIT（限价）/MARKET（市价） | LIMIT |
+
+说明与映射建议：
+- 本表以实体字段为准（`TrEntrustPo`），如果项目需要对外更语义化的字段名，可在 Controller 层返回 DTO，并在 DTO 中把实体字段映射为更友好的字段名。
+- `number` 是 Java 字段名且在表定义中被转义为 `\`number\``; 对前端使用 `amount` 更直观（由后端在 DTO 层处理）。
+- 如果业务需要对外持久化且检索单号，建议在表中新增 `entrust_no` 或 `entrustNo` 字段（字符串），用于对外展示与查询；当前实体中没有此字段，前端若需单号请后端补充。
+
+枚举（建议后端统一约定并在文档中明确）：
+- direction / type：
+  - BUY — 买
+  - SELL — 卖
+
+- orderType / style：
+  - LIMIT — 限价单
+  - MARKET — 市价单
+
+- status / state（实体 `state`，建议映射如下）:
+  - unfilled — 未成交 / 进行中
+  - section — 部分成交
+  - all — 已全部成交
+  - cancel — 已撤销
+  - uncancel — 部分撤销
+示例响应（示例以常见对外字段名展示，实际以 DTO/接口返回为准）
+
+```
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "id": 201,
+    "entrustNo": "C2C20260330001",
+    "entrustId": 1001,
+    "member": "M2026033001",
+    "address": "0xabc...",
+    "virtualCoin": "USDT",        // 对应实体 maincoin
+    "faitCoin": "CNY",           // 对应实体 tradcoin
+    "direction": "BUY",          // 对应实体 type
+    "orderType": "LIMIT",        // 对应实体 style
+    "amount": "1.00000000",      // 对应实体 number
+    "price": "44800.00",
+    "totalAmount": "44800.00",   // 对应实体 tradeAmount
+    "filled": "0.50000000",      // 对应实体 completed
+    "unfilled": "0.50000000",    // 对应实体 unfilled
+    "fee": "0.0001",
+    "completedFee": "0.00005",
+    "unfilledFee": "0.00005",
+    "status": "PENDING",
+    "createTime": "2026-03-30T10:45:00Z",
+    "updateTime": "2026-03-30T10:50:00Z",
+    "paymentMethods": ["ALIPAY","WX"],
+    "remark": "用户留言或商户备注"
   }
 }
 ```
 
-错误示例：
-
-```json
-{
-  "code": 1,
-  "msg": "parameter",
-  "data": null
-}
-```
-
-注意事项
-
-- 委托状态说明：
-  - `PENDING`：待成交，未有成交量
-  - `PARTIAL`：部分成交，已成交部分数量
-  - `FILLED`：已成交，全部成交
-  - `CANCELLED`：已取消，用户手动取消
-  - `EXPIRED`：已过期，委托超时自动取消
-- 查询结果按创建时间倒序排列
-- 时间字段格式为 `yyyy-MM-dd HH:mm:ss`
